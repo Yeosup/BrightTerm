@@ -10,6 +10,8 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입�
 
 ## 설치
 
+**[최신 버전 내려받기 → Releases](https://github.com/Yeosup/BrightTerm/releases/latest)**
+
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
 | Windows | `BrightTerm-Setup-1.0.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
