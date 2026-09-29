@@ -1,0 +1,18 @@
+{
+  "banners": [
+    {
+      "id": "moduapp-welcome",
+      "slot": "welcome",
+      "image": "https://example.com/brightterm/banner-moduapp-wide.png",
+      "link": "https://moduapp.kr/?utm_source=brightterm&utm_medium=app_banner&utm_campaign=house&utm_content=welcome",
+      "alt": "모두의 앱 — 사람들이 직접 만든 앱, 모두앱이 찾아드려요"
+    },
+    {
+      "id": "moduapp-sidebar",
+      "slot": "sidebar",
+      "image": "https://example.com/brightterm/banner-moduapp-side.png",
+      "link": "https://moduapp.kr/?utm_source=brightterm&utm_medium=app_banner&utm_campaign=house&utm_content=sidebar",
+      "alt": "모두의 앱 — 인디 앱, 모두앱이 찾아드려요"
+    }
+  ]
+}

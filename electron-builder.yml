@@ -1,0 +1,55 @@
+appId: kr.balkeunter.brightterm
+productName: BrightTerm
+copyright: Copyright (c) 2026 Balkeunter
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**/*
+  - package.json
+  - resources/**
+  - '!**/*.map'
+  - '!node_modules/cpu-features/**'
+  - '!node_modules/ssh2/lib/protocol/crypto/build/**'
+  - '!node_modules/@serialport/bindings-cpp/build/**'
+  - '!test/**'
+asarUnpack:
+  - node_modules/@serialport/**
+  - node_modules/cpu-features/**
+npmRebuild: false
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: build/icon.png
+  artifactName: ${productName}-${version}-${arch}-${target}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  shortcutName: BrightTerm
+  artifactName: ${productName}-Setup-${version}.${ext}
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: build/icon.png
+  category: public.app-category.developer-tools
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+  # 사내 배포용: Developer ID 대신 ad-hoc 서명('-'). 서명이 아예 없으면 macOS 가
+  # 로컬 네트워크 권한 창을 띄우지 못해 192.168.x.x 접속이 "네트워크에 도달할 수 없습니다"로 막힌다.
+  identity: '-'
+  hardenedRuntime: false
+  extendInfo:
+    NSLocalNetworkUsageDescription: 사내 네트워크(192.168.x.x 등)의 SSH·텔넷 서버에 접속하려면 로컬 네트워크 접근이 필요합니다.
+dmg:
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+linux:
+  target: AppImage
+  icon: build/icon.png
+publish: null
