@@ -53,7 +53,8 @@ async function get(url: string, max: number): Promise<{ type: string; body: Buff
   try {
     const r = await net.fetch(url, { signal: ctl.signal, credentials: 'omit', cache: 'no-store' })
     if (!r.ok) throw new Error(`HTTP ${r.status}`)
-    if (!r.url.startsWith('https://')) throw new Error('redirected off https')
+    // Electron net.fetch 는 url 을 비워 줄 때가 있다 — 값이 있을 때만 검사
+    if (r.url && !r.url.startsWith('https://')) throw new Error('redirected off https')
     const body = Buffer.from(await r.arrayBuffer())
     if (body.length > max) throw new Error('too large')
     return { type: (r.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase(), body }
