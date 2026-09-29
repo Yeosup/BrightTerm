@@ -20,7 +20,7 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입�
 | macOS (Intel) | `BrightTerm-1.0.0-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
-- **macOS**: dmg에서 앱을 응용 프로그램 폴더로 끌어 넣은 뒤, 처음 한 번은 앱을 **우클릭 → 열기** 하세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
+- **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
 
 처음 실행하면 **마스터 비밀번호**를 정합니다. 서버 비밀번호와 키는 이 비밀번호로 암호화되어 이 PC에만 저장됩니다. 이때 나오는 **복구 코드 24자리**는 꼭 따로 보관하세요. 마스터 비밀번호를 잊으면 이 코드로만 복구할 수 있습니다.
 
@@ -116,7 +116,8 @@ npm run dev          # 개발 실행
 npm run build        # 빌드
 npm run typecheck
 npm run dist:win     # Windows 설치형 + 포터블 (dist/)
-npm run dist:mac     # macOS dmg x64 + arm64 (dist/) — ad-hoc 서명
+npm run dist:mac     # macOS dmg x64 + arm64 (dist/) — ad-hoc 서명(인증서 없이)
+APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed  # Developer ID 서명 + 공증 (electron-builder.signed.yml)
 ```
 
 - 구조: `src/main`(Electron 메인: SSH/시리얼/텔넷, 볼트, SFTP, 가져오기, AWS, 배너), `src/preload`, `src/renderer`(React + xterm.js UI, 키 판정은 `platform.ts`), `src/shared`(공용 타입).

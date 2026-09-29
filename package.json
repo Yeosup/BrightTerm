@@ -15,7 +15,8 @@
     "dist:win": "electron-vite build && electron-builder --win --x64",
     "dist:dir": "electron-vite build && electron-builder --win --x64 --dir",
     "dist:mac": "electron-vite build && electron-builder --mac",
-    "dist:mac:dir": "electron-vite build && electron-builder --mac --dir"
+    "dist:mac:dir": "electron-vite build && electron-builder --mac --dir",
+    "dist:mac:signed": "electron-vite build && electron-builder --mac -c electron-builder.signed.yml"
   },
   "dependencies": {
     "iconv-lite": "^0.7.3",

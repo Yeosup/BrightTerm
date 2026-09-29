@@ -1,0 +1,11 @@
+# macOS 정식 배포: Developer ID 서명 + Hardened Runtime + Apple 공증 (경고 없이 열림)
+#   APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed
+# 인증서가 없는 환경에서는 기본 설정(ad-hoc)의 `npm run dist:mac` 을 쓴다.
+extends: ./electron-builder.yml
+mac:
+  identity: WIZBL USA (2KVL7MR96K)
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  notarize: true
