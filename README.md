@@ -124,6 +124,10 @@ APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed  # Develop
 - 테스트: `test/e2e.mjs`(Linux sshd 시나리오), `test/e2e-mac.mjs`(macOS 키 모델·붙여넣기·이미지 업로드 — 파일 머리 주석 참고), `test/importers.test.mjs`(가져오기 파서).
 - 요구 사항: Node 20+, Electron 43.
 
+## 개인정보
+
+개인정보를 수집하지 않습니다 — [개인정보처리방침](./PRIVACY.md)
+
 ## 라이선스
 
 [MIT](./LICENSE) — 누구나 자유롭게 쓰고, 고치고, 배포할 수 있습니다.
