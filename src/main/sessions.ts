@@ -9,6 +9,7 @@ import { SshTransport } from './transports/ssh'
 import { TelnetTransport } from './transports/telnet'
 import { SerialTransport } from './transports/serial'
 import { LocalTransport } from './transports/local'
+import { persistSupported, startupLine } from './persist'
 import { send } from './ui'
 import { store, dataDir } from './store'
 import { vault } from './vault'
@@ -103,7 +104,8 @@ export class Session {
       color: persistent ? resolveHostColor(host) : undefined,
       env: persistent ? resolveHostEnv(host) : 'none',
       state: 'connecting',
-      canSftp: host.protocol === 'ssh'
+      canSftp: host.protocol === 'ssh',
+      persist: persistSupported(host)
     }
   }
 
@@ -155,7 +157,8 @@ export class Session {
         const lt = new LocalTransport(h.local ?? {}, h.termType)
         await lt.start(this.cols, this.rows)
         if (lt.cwdFallback) this.info_(`시작 폴더(${h.local?.cwd})가 없어 홈 폴더에서 엽니다`, '33')
-        if (h.startupCommand) setTimeout(() => lt.write(Buffer.from(h.startupCommand!.replace(/\r?\n/g, '\r') + '\r')), 300)
+        const line = startupLine(h)
+        if (line) setTimeout(() => lt.write(Buffer.from(line.replace(/\r?\n/g, '\r') + '\r')), 300)
         t = lt
       } else if (h.protocol === 'telnet') {
         const tt = new TelnetTransport(h.host, h.port, h.termType)

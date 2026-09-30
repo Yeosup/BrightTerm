@@ -5,6 +5,7 @@ import { ENV_COLORS, ENV_LABELS, type Group, type Host } from '@shared/types'
 import { panes } from '../layout'
 import { isMac, modKey } from '../platform'
 import { AdBanner } from './AdBanner'
+import { focusSession } from '../terms'
 
 export function hostColor(h: Host, groups: Group[]): string | undefined {
   if (h.color) return h.color
@@ -144,7 +145,11 @@ export function Sidebar(): JSX.Element {
         draggable={!section}
         onDragStart={(e) => e.dataTransfer.setData('bt/host', h.id)}
         data-host={section ? undefined : h.id}
-        onClick={() => { setSelected(h.id); st().revealHost(h.id) }}
+        onClick={() => {
+          setSelected(h.id)
+          // 이미 그 창이 선택돼 있으면 상태가 안 바뀌어 포커스가 사이드바에 남는다 — 키 입력(특히 Enter=새로 열기)이 새지 않게 터미널로 직접 옮긴다
+          if (st().revealHost(h.id)) requestAnimationFrame(() => { const id = st().focusedSession()?.id; if (id) focusSession(id) })
+        }}
         onDoubleClick={() => { if (!openIds.has(h.id)) st().openHost(h.id) }}
         onContextMenu={(e) => hostMenu(e, h)}
         title={`${h.alias}\n${hostTarget(h, true)}${h.notes ? '\n' + h.notes : ''}`}

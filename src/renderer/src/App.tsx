@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { restoreWorkspace, startWorkspaceSaving } from './workspace'
 import { useApp } from './state'
 import { api } from './api'
 import { wireData, applySettingsToAll, getEntry, refocusTerminal } from './terms'
@@ -146,6 +147,13 @@ export default function App(): JSX.Element {
       api.vault.unlockOs().then(async (ok) => { if (ok) useApp.setState({ vault: await api.vault.status() }) })
     }
   }, [loaded])
+
+  // 지난 탭·분할 복원(볼트가 열린 뒤 한 번) + 이후 변경을 저장
+  useEffect(() => startWorkspaceSaving(), [])
+  useEffect(() => {
+    if (!loaded || !vault.unlocked) return
+    api.store.get().then((d) => restoreWorkspace(d.workspace, useApp.getState().settings.restoreTabs))
+  }, [loaded, vault.unlocked])
 
   // first run: offer PuTTY / ssh config import
   useEffect(() => {

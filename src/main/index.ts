@@ -10,6 +10,7 @@ import { setWindow, respond, send } from './ui'
 import { scanPutty, scanSshConfig, scanPuttyHostKeys } from './importers'
 import { listSerialPorts } from './transports/serial'
 import { listShells } from './transports/local'
+import { initialBounds, resetWindow, trackWindow } from './windowState'
 import { scanAws } from './aws'
 import { cachedBanners, refreshBanners } from './ads'
 import type { AdhocTarget, CredentialInput, Group, Host, ImportCandidate, StoreData } from '@shared/types'
@@ -32,9 +33,9 @@ app.on('second-instance', () => {
 
 function createWindow(): void {
   const dark = store.get().settings.theme !== 'light'
+  const init = initialBounds(store.get().settings.rememberWindow)
   win = new BrowserWindow({
-    width: 1440,
-    height: 900,
+    ...init.bounds,
     minWidth: 900,
     minHeight: 560,
     show: false,
@@ -52,6 +53,8 @@ function createWindow(): void {
     }
   })
   setWindow(win)
+  if (init.maximized) win.maximize()
+  trackWindow(win, () => store.get().settings.rememberWindow)
   win.once('ready-to-show', () => win?.show())
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//.test(url)) shell.openExternal(url)
@@ -59,7 +62,9 @@ function createWindow(): void {
   })
   win.webContents.on('will-navigate', (e) => e.preventDefault())
   win.on('close', (e) => {
-    const open = [...sessions.sessions.values()].filter((s) => s.info.state === 'connected').length
+    const live = [...sessions.sessions.values()].filter((s) => s.info.state === 'connected')
+    const open = live.length
+    const kept = live.filter((s) => s.info.persist).length
     if (open > 0 && !(win as BrowserWindow & { _forceClose?: boolean })._forceClose) {
       const r = dialog.showMessageBoxSync(win!, {
         type: 'question',
@@ -67,7 +72,8 @@ function createWindow(): void {
         defaultId: 1,
         cancelId: 1,
         title: 'BrightTerm',
-        message: `연결된 세션 ${open}개가 있습니다. 모두 닫고 종료할까요?`
+        message: `연결된 세션 ${open}개가 있습니다. 모두 닫고 종료할까요?`,
+        detail: kept ? `세션 유지(tmux)로 연 창 ${kept}개는 종료해도 안의 프로그램이 계속 돌고, 다시 열면 그대로 붙습니다.` : undefined
       })
       if (r !== 0) e.preventDefault()
     }
@@ -225,6 +231,7 @@ function registerIpc(): void {
   handle('ads:get', () => cachedBanners())
   handle('app:openBanner', (url: string) => { if (/^https:\/\//.test(url)) shell.openExternal(url) })
   handle('app:toggleFullScreen', () => win?.setFullScreen(!win.isFullScreen()))
+  handle('app:resetWindow', () => { if (win) resetWindow(win) })
 }
 
 /**

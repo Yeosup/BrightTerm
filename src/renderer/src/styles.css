@@ -379,3 +379,6 @@ input, textarea, select, button { font: inherit; color: inherit; }
 
 /* 서버 편집 — 직접 입력한 베스천 */
 .jump-inline { display: flex; flex-direction: column; gap: 10px; margin: -4px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
+.persist-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
+.persist-box .toggle { padding: 0; border: 0; }
+.ph-persist { margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 10.5px; font-weight: 600; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }

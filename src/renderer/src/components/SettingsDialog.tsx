@@ -39,6 +39,13 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
         <div className="s-body">
           {sec === 'look' && (
             <>
+              <div className="card">
+                <Toggle label="창 크기·위치 기억" desc="앱을 다시 켜면 마지막 크기·위치(최대화 포함)로 엽니다. 모니터가 바뀌어 화면 밖이면 가운데로 엽니다" value={settings.rememberWindow} onChange={(v) => set({ rememberWindow: v })} />
+                <div className="toggle">
+                  <div className="t-label"><span>창 크기 원래대로</span><small>처음 크기(1440×900, 화면보다 크면 화면에 맞춤)로 되돌리고 가운데에 놓습니다</small></div>
+                  <button className="btn sm" onClick={() => api.app.resetWindow()}>원래 크기로</button>
+                </div>
+              </div>
               <Field label="앱 테마">
                 <Seg value={settings.theme} onChange={(v) => set({ theme: v, terminalTheme: v === 'light' && settings.terminalTheme === 'BrightTerm Dark' ? 'BrightTerm Light' : v === 'dark' && settings.terminalTheme === 'BrightTerm Light' ? 'BrightTerm Dark' : settings.terminalTheme })}
                   options={[{ value: 'dark', label: '다크' }, { value: 'light', label: '라이트' }]} />
@@ -108,6 +115,7 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
             <>
               <div className="card">
                 <Toggle label="끊기면 자동 재접속" desc="네트워크가 끊기면 2·4·8…초 간격으로 최대 8번 다시 연결합니다" value={settings.autoReconnect} onChange={(v) => set({ autoReconnect: v })} />
+                <Toggle label="시작할 때 지난 탭·분할 다시 열기" desc="앱을 다시 켜면 닫을 때 열려 있던 탭과 분할 배치로 다시 접속합니다. 세션 유지(tmux)를 켠 창은 하던 화면 그대로 돌아옵니다" value={settings.restoreTabs} onChange={(v) => set({ restoreTabs: v })} />
                 <Toggle label="세션 로그 저장" desc="터미널 출력을 텍스트 파일로 저장합니다 (새 연결부터 적용)" value={settings.sessionLog} onChange={(v) => set({ sessionLog: v })} />
               </div>
               <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => api.app.openLogs()}><FolderOpen size={13} />로그 폴더 열기</button>

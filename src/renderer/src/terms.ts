@@ -45,6 +45,8 @@ function termOptions(s: Settings): ConstructorParameters<typeof Terminal>[0] {
     theme: TERMINAL_THEMES[s.terminalTheme] ?? TERMINAL_THEMES['BrightTerm Dark'],
     allowProposedApi: true,
     macOptionIsMeta: true,
+    // tmux 등이 마우스를 잡고 있어도 ⌥+드래그(Windows 는 Shift+드래그)로 글자를 선택·복사할 수 있게
+    macOptionClickForcesSelection: true,
     rightClickSelectsWord: false,
     drawBoldTextInBrightColors: true,
     minimumContrastRatio: 1,

@@ -72,6 +72,10 @@ export interface Host {
   forwards: PortForward[]
   serial?: SerialOptions
   local?: LocalOptions
+  /** 세션 유지 — 접속하면 tmux 세션에 붙는다. 앱을 꺼도 안의 프로그램이 계속 돈다 */
+  persist?: boolean
+  /** tmux 세션 이름(비우면 별칭·폴더에서 만든다) */
+  persistName?: string
   notes?: string
   favorite?: boolean
   lastUsedAt?: number
@@ -116,7 +120,19 @@ export interface Settings {
   bell: boolean
   sidebarWidth: number
   rightPanelWidth: number
+  /** 시작할 때 지난 탭·분할 다시 열기 */
+  restoreTabs: boolean
+  /** 창 크기·위치 기억 */
+  rememberWindow: boolean
 }
+
+/** 앱을 다시 켤 때 복원할 탭·분할 — 창마다 서버 id 또는 로컬 시작 폴더만 기억한다 */
+export type SavedPane = { hostId: string } | { local: { cwd?: string } }
+export type SavedLayout =
+  | { type: 'pane'; pane: SavedPane }
+  | { type: 'split'; dir: 'row' | 'col'; sizes: number[]; children: SavedLayout[] }
+export interface SavedTab { title?: string; root: SavedLayout; focused: number; zoomed?: number | null }
+export interface SavedWorkspace { tabs: SavedTab[]; active: number; savedAt: number }
 
 export interface StoreData {
   version: number
@@ -125,6 +141,7 @@ export interface StoreData {
   snippets: Snippet[]
   knownHosts: KnownHost[]
   settings: Settings
+  workspace?: SavedWorkspace
 }
 
 export interface CredentialMeta {
@@ -170,6 +187,8 @@ export interface SessionInfo {
   connectedAt?: number
   message?: string
   canSftp: boolean
+  /** 세션 유지(tmux) 로 연 창 */
+  persist?: boolean
 }
 
 export interface AdhocTarget {
@@ -254,7 +273,9 @@ export const DEFAULT_SETTINGS: Settings = {
   sessionLog: false,
   bell: false,
   sidebarWidth: 260,
-  rightPanelWidth: 340
+  rightPanelWidth: 340,
+  restoreTabs: true,
+  rememberWindow: true
 }
 
 export const ENV_COLORS: Record<Env, string> = {

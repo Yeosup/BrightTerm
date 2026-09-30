@@ -49,7 +49,8 @@ class Store {
       hosts: raw?.hosts ?? [],
       snippets: raw?.snippets ?? [],
       knownHosts: raw?.knownHosts ?? [],
-      settings: withDefaults(raw?.settings)
+      settings: withDefaults(raw?.settings),
+      workspace: raw?.workspace
     }
     return this.data
   }

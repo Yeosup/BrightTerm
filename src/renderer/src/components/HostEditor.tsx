@@ -341,6 +341,22 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
                 <div className="muted" style={{ fontSize: 12 }}>이 서버에 접속할 때 위 베스천을 먼저 거칩니다. 베스천은 서버 목록에 따로 생기지 않습니다.</div>
               </div>
             )}
+            {(h.protocol === 'ssh' || (h.protocol === 'local' && (isMac || /wsl(\.exe)?$/i.test(h.local?.shell ?? '')))) && (
+              <div className="persist-box">
+                <div className="toggle">
+                  <div className="t-label">
+                    <span>세션 유지 (tmux)</span>
+                    <small>창을 닫거나 앱을 꺼도 안에서 돌던 프로그램(Claude Code 등)이 계속 돕니다. 다시 열면 그 화면에 그대로 붙습니다. {h.protocol === 'ssh' ? '서버에' : '이 PC에'} tmux 가 있어야 합니다{h.protocol === 'local' && isMac ? ' (brew install tmux)' : h.protocol === 'ssh' ? ' (Ubuntu: sudo apt install tmux)' : ''}.</small>
+                  </div>
+                  <Switch value={!!h.persist} onChange={(v) => set('persist', v)} />
+                </div>
+                {h.persist && (
+                  <Field label="tmux 세션 이름 (선택)" hint="비우면 별칭·폴더 이름으로 만듭니다. 완전히 끝내려면 그 창에서 exit">
+                    <input className="input mono" value={h.persistName ?? ''} onChange={(e) => set('persistName', e.target.value || undefined)} placeholder="자동" />
+                  </Field>
+                )}
+              </div>
+            )}
             <Field label={h.protocol === 'local' ? '셸 시작 후 자동 실행 명령' : '접속 후 자동 실행 명령'} hint={h.protocol === 'local' ? '예: nvm use && claude' : '예: cd /var/www && sudo -i'}>
               <input className="input mono" value={h.startupCommand ?? ''} onChange={(e) => set('startupCommand', e.target.value)} />
             </Field>

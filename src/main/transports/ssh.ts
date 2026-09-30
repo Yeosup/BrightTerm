@@ -7,6 +7,7 @@ import type { Transport } from './types'
 import { ask } from '../ui'
 import { store } from '../store'
 import { vault } from '../vault'
+import { startupLine } from '../persist'
 
 export interface SshContext {
   title: string
@@ -235,9 +236,8 @@ export class SshTransport extends EventEmitter implements Transport {
     this.stream.on('close', () => this.finish())
     client.on('close', () => this.finish('연결이 종료되었습니다'))
     this.setupForwards()
-    if (this.host.startupCommand) {
-      setTimeout(() => this.stream?.write(this.host.startupCommand!.replace(/\r?\n/g, '\r') + '\r'), 400)
-    }
+    const line = startupLine(this.host)
+    if (line) setTimeout(() => this.stream?.write(line.replace(/\r?\n/g, '\r') + '\r'), 400)
   }
 
   private setupForwards(): void {
