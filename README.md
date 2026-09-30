@@ -14,10 +14,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.0.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.0.0.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.0.0-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.0.0-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.0.1.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.0.1.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.0.1-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.0.1-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
