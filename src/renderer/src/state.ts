@@ -76,6 +76,10 @@ interface State {
   removeGroup(id: string): void
 
   openHost(hostId: string, where?: 'tab' | Dir): Promise<void>
+  /** 이미 열린 세션이 있으면 그 탭·패널로 이동(여러 개면 누를 때마다 다음 것). 없으면 false */
+  revealHost(hostId: string): boolean
+  /** 포커스된 패널의 서버 id — 사이드바 선택 동기화용 */
+  focusedHostId(): string | null
   openAdhoc(t: AdhocTarget, where?: 'tab' | Dir): Promise<void>
   openGroupGrid(groupId: string): Promise<void>
   closePane(paneId: string, tabId?: string): Promise<void>
@@ -186,6 +190,24 @@ export const useApp = create<State>((set, get) => ({
     } catch (e) {
       get().toast('error', (e as Error).message)
     }
+  },
+
+  revealHost(hostId) {
+    const s = get()
+    const hits: { tab: Tab; pane: PaneNode }[] = []
+    for (const tab of s.tabs) for (const pane of panes(tab.root)) if (s.sessions[pane.sessionId]?.hostId === hostId) hits.push({ tab, pane })
+    if (!hits.length) return false
+    const cur = s.tabs.find((t) => t.id === s.activeTab)
+    const at = hits.findIndex((h) => h.tab.id === cur?.id && h.pane.id === cur?.focused)
+    // 지금 보고 있는 게 그 서버면 다음 것으로, 아니면 현재 탭 안의 것을 먼저
+    const next = at >= 0 ? hits[(at + 1) % hits.length] : hits.find((h) => h.tab.id === cur?.id) ?? hits[0]
+    if (next.tab.zoomed && next.tab.zoomed !== next.pane.id) get().updateTab(next.tab.id, { zoomed: next.pane.id })
+    get().focusPane(next.tab.id, next.pane.id)
+    return true
+  },
+
+  focusedHostId() {
+    return get().focusedSession()?.hostId ?? null
   },
 
   async openAdhoc(t, where = 'tab') {

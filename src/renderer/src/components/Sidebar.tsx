@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronRight, ChevronDown, Folder, FolderOpen, Search, Plus, FolderPlus, Download, Star, Terminal, SquareTerminal, Cpu, Radio, Clock, SplitSquareHorizontal, Play } from 'lucide-react'
 import { useApp, newHost } from '../state'
 import { ENV_COLORS, ENV_LABELS, type Group, type Host } from '@shared/types'
@@ -56,6 +56,20 @@ export function Sidebar(): JSX.Element {
     }
     return m
   }, [tabs, sessions])
+  // 끊긴 것까지 포함해 패널이 하나라도 있는 서버 — 더블클릭 때 새로 열지 판단
+  const openIds = useMemo(() => new Set(tabs.flatMap((t) => panes(t.root).map((p) => sessions[p.sessionId]?.hostId).filter(Boolean))), [tabs, sessions])
+
+  // 패널을 옮기면 사이드바 선택도 따라간다
+  const focusedHost = useApp((s) => {
+    const tab = s.tabs.find((t) => t.id === s.activeTab)
+    const p = tab && panes(tab.root).find((x) => x.id === tab.focused)
+    return (p && s.sessions[p.sessionId]?.hostId) ?? null
+  })
+  useEffect(() => {
+    if (!focusedHost) return
+    setSelected(focusedHost)
+    document.querySelector(`.sidebar [data-host="${focusedHost}"]`)?.scrollIntoView({ block: 'nearest' })
+  }, [focusedHost])
 
   const q = filter.trim()
   const visibleHosts = hosts.filter((h) => matches(h, q, groups))
@@ -129,8 +143,9 @@ export function Sidebar(): JSX.Element {
         style={{ paddingLeft: 6 + depth * 14 }}
         draggable={!section}
         onDragStart={(e) => e.dataTransfer.setData('bt/host', h.id)}
-        onClick={() => setSelected(h.id)}
-        onDoubleClick={() => st().openHost(h.id)}
+        data-host={section ? undefined : h.id}
+        onClick={() => { setSelected(h.id); st().revealHost(h.id) }}
+        onDoubleClick={() => { if (!openIds.has(h.id)) st().openHost(h.id) }}
         onContextMenu={(e) => hostMenu(e, h)}
         title={`${h.alias}\n${hostTarget(h, true)}${h.notes ? '\n' + h.notes : ''}`}
       >
