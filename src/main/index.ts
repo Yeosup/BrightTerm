@@ -9,7 +9,7 @@ import * as sftp from './sftp'
 import { setWindow, respond, send } from './ui'
 import { scanPutty, scanSshConfig, scanPuttyHostKeys } from './importers'
 import { listSerialPorts } from './transports/serial'
-import { listShells } from './transports/local'
+import { hasTmux, listShells } from './transports/local'
 import { initialBounds, resetWindow, trackWindow } from './windowState'
 import { scanAws } from './aws'
 import { cachedBanners, refreshBanners } from './ads'
@@ -154,6 +154,7 @@ function registerIpc(): void {
   handle('sftp:edit', (id: string, path: string) => sftp.editRemote(id, path))
   handle('local:saveForPrompt', (src: Parameters<typeof sftp.saveForPromptLocal>[0]) => sftp.saveForPromptLocal(src))
   handle('local:shells', () => listShells())
+  handle('local:hasTmux', () => hasTmux())
   handle('sftp:uploadForPrompt', (id: string, src: Parameters<typeof sftp.uploadForPrompt>[1]) => sftp.uploadForPrompt(id, src))
 
   // clipboard

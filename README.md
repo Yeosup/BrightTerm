@@ -15,10 +15,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.2.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.2.0.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.2.0-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.2.0-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.2.1.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.2.1.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.2.1-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.2.1-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
@@ -46,7 +46,7 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 | SFTP | 같은 연결로 파일 패널이 열립니다(재로그인 없음). 끌어다 놓아 업로드하고, 우클릭으로 다운로드·삭제·권한·이름 변경을 합니다. 이미지 미리보기와 "로컬 앱으로 편집"(저장하면 자동 업로드)도 있습니다. |
 | 동시 입력 | 한 탭의 모든 패널에 같은 명령을 입력합니다. |
 | 운영 서버 보호 | 운영 서버에서 `rm -rf`, `reboot`, `DROP TABLE` 같은 명령을 실행하거나 붙여넣으면 확인 창을 띄웁니다. 여러 줄을 붙여넣을 때도 확인합니다. |
-| 세션 유지 (tmux) | 서버·로컬 터미널 편집 → 고급 → **세션 유지**를 켜면 접속할 때 tmux 세션에 붙습니다. 창을 닫거나 앱을 꺼도 안에서 돌던 프로그램(Claude Code 등)이 계속 돌고, 다시 열면 그 화면에 그대로 붙습니다. 서버에는 tmux 가 있어야 하고(Ubuntu: `sudo apt install tmux`), macOS 로컬은 `brew install tmux`. Windows 로컬은 WSL 셸에서만. 마우스 휠 스크롤이 되도록 맞춰 두며, 글자 선택은 ⌥+드래그(Windows Shift+드래그). 완전히 끝내려면 그 창에서 `exit`. |
+| 세션 유지 (tmux) | 서버·로컬 터미널 편집 → 고급 → **세션 유지**를 켜면 접속할 때 tmux 세션에 붙습니다. 창을 닫거나 앱을 꺼도 안에서 돌던 프로그램(Claude Code 등)이 계속 돌고, 다시 열면 그 화면에 그대로 붙습니다. 서버에는 tmux 가 있어야 하고(Ubuntu: `sudo apt install tmux`), macOS 로컬은 `brew install tmux`. Windows 로컬은 WSL 셸에서만. 새로 만드는 로컬 터미널은 tmux 가 있으면 세션 유지가 기본으로 켜집니다. 자동 실행 명령(예: `claude --continue`)은 tmux 세션을 처음 만들 때만 실행되고, 다시 붙을 때는 돌던 프로그램에 그대로 붙습니다. 마우스 휠 스크롤이 되도록 맞춰 두며, 글자 선택은 ⌥+드래그(Windows Shift+드래그). 완전히 끝내려면 그 창에서 `exit`. |
 | 탭·분할 복원 | 앱을 다시 켜면 닫을 때 열려 있던 탭과 분할 배치로 다시 접속합니다(설정 → 연결에서 끌 수 있음). 세션 유지를 켠 창은 하던 화면 그대로 돌아옵니다. 저장하지 않고 바로 연 SSH 창은 비밀번호가 필요해 복원하지 않습니다. |
 | 창 크기 기억 | 다시 켜면 마지막 창 크기·위치(최대화 포함)로 엽니다. 모니터가 바뀌어 화면 밖이면 가운데로. 설정 → 모양에서 끄거나 **원래 크기로** 되돌릴 수 있습니다. |
 | 자동 재접속 | 연결이 끊기면 2·4·8…초 간격으로 다시 연결합니다. 끊긴 창에서 Enter를 누르면 바로 재접속합니다. |

@@ -47,6 +47,13 @@ export function listShells(): { path: string; label: string }[] {
   return [def, ...listed.filter((p) => p !== def)].map((p) => ({ path: p, label: p.split('/').pop()! }))
 }
 
+/** tmux 가 있는지 — Finder 로 켠 앱은 PATH 가 짧아서 흔한 설치 위치도 본다 */
+export function hasTmux(): boolean {
+  if (isWin) return false
+  const dirs = [...(process.env.PATH ?? '').split(':'), '/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/home/linuxbrew/.linuxbrew/bin']
+  return dirs.some((d) => d && existsSync(join(d, 'tmux')))
+}
+
 function defaultShell(): string {
   if (isWin) return 'powershell.exe'
   return process.env.SHELL && existsSync(process.env.SHELL) ? process.env.SHELL : '/bin/zsh'

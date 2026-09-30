@@ -93,6 +93,7 @@ export const api = {
   serial: { list: () => bt.call<{ path: string; label: string }[]>('serial:list') },
   local: {
     shells: () => bt.call<{ path: string; label: string }[]>('local:shells'),
+    hasTmux: () => bt.call<boolean>('local:hasTmux'),
     saveForPrompt: (src: { kind: 'clipboardImage' } | { kind: 'files'; paths: string[] } | { kind: 'buffer'; name: string; data: Uint8Array }) =>
       bt.call<string[]>('local:saveForPrompt', src)
   },

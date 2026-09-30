@@ -156,7 +156,7 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
         {tab === 'basic' && (
           <>
             <Field label="프로토콜">
-              <Seg value={h.protocol} onChange={(v) => { set('protocol', v); if (v === 'telnet' && h.port === 22) set('port', 23); if (v === 'ssh' && h.port === 23) set('port', 22); if (v === 'serial' && !h.serial) set('serial', DEFAULT_SERIAL); if (v === 'serial' && (!h.env || h.env === 'none')) set('env', 'device'); if (v !== 'local' && h.port === 0) set('port', v === 'telnet' ? 23 : 22) }}
+              <Seg value={h.protocol} onChange={(v) => { set('protocol', v); if (v === 'telnet' && h.port === 22) set('port', 23); if (v === 'ssh' && h.port === 23) set('port', 22); if (v === 'serial' && !h.serial) set('serial', DEFAULT_SERIAL); if (v === 'serial' && (!h.env || h.env === 'none')) set('env', 'device'); if (v !== 'local' && h.port === 0) set('port', v === 'telnet' ? 23 : 22); if (v === 'local' && isNew && h.persist === undefined) api.local.hasTmux().then((ok) => ok && setH((x) => (x.persist === undefined ? { ...x, persist: true } : x))) }}
                 options={[{ value: 'ssh', label: 'SSH' }, { value: 'telnet', label: 'Telnet' }, { value: 'serial', label: isMac ? '시리얼 (USB/RS-485)' : '시리얼 (COM/RS-485)' }, { value: 'local', label: '로컬 (이 PC)' }]} />
             </Field>
             <Field label="별칭 (탭·목록에 표시될 이름)">
@@ -357,8 +357,8 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
                 )}
               </div>
             )}
-            <Field label={h.protocol === 'local' ? '셸 시작 후 자동 실행 명령' : '접속 후 자동 실행 명령'} hint={h.protocol === 'local' ? '예: nvm use && claude' : '예: cd /var/www && sudo -i'}>
-              <input className="input mono" value={h.startupCommand ?? ''} onChange={(e) => set('startupCommand', e.target.value)} />
+            <Field label={h.protocol === 'local' ? '셸 시작 후 자동 실행 명령' : '접속 후 자동 실행 명령'} hint={h.protocol === 'local' ? (h.persist ? '세션 유지가 켜져 있으면 tmux 세션을 처음 만들 때만 실행됩니다 — 다시 붙을 때는 돌던 프로그램에 그대로 붙습니다' : '창을 열 때마다 실행됩니다. 예: nvm use && claude') : '예: cd /var/www && sudo -i'}>
+              <input className="input mono" value={h.startupCommand ?? ''} onChange={(e) => set('startupCommand', e.target.value)} placeholder={h.protocol === 'local' ? 'claude --continue' : 'cd /var/www && sudo -i'} />
             </Field>
             {h.protocol === 'local' ? (
               <Field label="터미널 종류"><input className="input mono" value={h.termType} onChange={(e) => set('termType', e.target.value)} /></Field>
