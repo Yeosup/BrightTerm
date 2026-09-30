@@ -139,6 +139,7 @@ BrightTerm은 개인과 회사·기관의 업무에 무료로 사용할 수 있�
 
 v1.1.1부터 BrightTerm 자체 코드에는
 [BrightTerm Source-Available License 1.0](./LICENSE)이 적용됩니다.
+무료 사용은 그대로 두고, 수정본을 유료로 판매하는 경우만 막기 위해 라이선스를 바꿨습니다.
 
 - 개인·회사 업무 사용 및 내부 수정: 무료 허용
 - 무료 재배포와 무료 수정본 배포: LICENSE 조건에 따라 허용
