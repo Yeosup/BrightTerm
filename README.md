@@ -1,12 +1,13 @@
 # BrightTerm
 
-PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입니다. 서버를 10대 넘게 동시에 띄워도 어느 창이 어느 서버인지 바로 알아볼 수 있게 만드는 것이 목표입니다.
+PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미널**입니다. 서버를 10대 넘게 동시에 띄워도 어느 창이 어느 서버인지 바로 알아볼 수 있게 만드는 것이 목표입니다.
 
 ![BrightTerm](./docs/screenshot.png)
 
 - 서버 계정은 내 PC에만 암호화해 저장합니다. 별도 서버·회원가입이 없습니다.
 - AWS EC2 인스턴스를 불러와 배스천(점프 호스트) 경유 접속까지 자동으로 설정합니다.
 - 캡처 이미지를 붙여넣으면 서버로 올리고 경로를 입력해 줍니다. 서버에서 Claude Code 같은 CLI를 쓸 때 편합니다.
+- 내 PC의 셸도 같은 창에서 엽니다. 프로젝트 폴더마다 로컬 터미널을 등록해 두면 폴더 하나로 여러 프로젝트를 격자로 띄울 수 있습니다.
 
 ## 설치
 
@@ -14,10 +15,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.0.1.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.0.1.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.0.1-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.0.1-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.1.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.1.0.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.1.0-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.1.0-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
@@ -32,6 +33,7 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 터미널**입�
 
 | 기능 | 사용법 |
 | --- | --- |
+| 로컬 터미널 | 내 PC의 셸(macOS: zsh 등, Windows: PowerShell·cmd·WSL)을 엽니다. 바로 열려면 ⇧⌘T / Ctrl+Alt+T 또는 빠른 접속에서 "로컬". 자주 쓰는 폴더는 `+ 서버 → 프로토콜: 로컬`에서 **시작 폴더**와 셸을 정해 저장합니다. 예: `Work` 폴더에 프로젝트마다 하나씩 만들고 폴더 ▶로 4분할. 캡처를 붙여넣으면 `~/.brightterm/uploads/`에 저장하고 경로를 입력합니다. `exit` 후 Enter를 누르면 새 셸을 엽니다. |
 | 서버 가져오기 | `가져오기` 버튼. **PuTTY 세션**(Windows 레지스트리, macOS `~/.putty/sessions`)과 **`~/.ssh/config`**를 읽습니다. 호스트·포트·사용자·키·포트 포워딩(`LocalForward`/`RemoteForward`)·점프 호스트(`ProxyJump`)·시리얼·인코딩이 옮겨집니다. 처음 실행할 때 자동으로 제안합니다. |
 | AWS EC2 가져오기 | `가져오기 → AWS EC2 불러오기`. 설치된 **aws CLI의 자격 증명**(`aws configure`)으로 모든 리전의 인스턴스를 읽습니다. 공인 IP가 없는 서버는 같은 VPC의 배스천(이름 앞부분이 같은 것 우선, 예: `shop-app` → `shop-bastion`)을 점프 호스트로 자동 연결합니다. 접속 계정은 AMI로 고르고(ubuntu/ec2-user 등), 키는 `~/.ssh/<키 페어 이름>.pem`에서 찾아 볼트에 넣습니다. |
 | 점프 호스트 (배스천 경유) | 서버 편집 → 고급 → 점프 호스트에서 먼저 거쳐 갈 서버를 고릅니다. 여러 단계도 됩니다. |
@@ -56,6 +58,7 @@ macOS에서는 앱 단축키가 모두 **⌘** 에 있어서 Ctrl+C/K/U/V/W 같�
 | 동작 | Windows | macOS |
 | --- | --- | --- |
 | 빠른 접속 / 새 연결 | Ctrl+K, Ctrl+Shift+T | ⌘K, ⌘T |
+| 새 로컬 터미널 | Ctrl+Alt+T | ⇧⌘T |
 | 탭(패널) 닫기 | Ctrl+Shift+W | ⌘W |
 | 오른쪽 / 아래 분할 | Ctrl+Shift+D / Ctrl+Shift+E | ⌘D / ⇧⌘D |
 | 패널 이동 | Alt+방향키 | ⌥⌘+방향키 |

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { ChevronRight, ChevronDown, Folder, FolderOpen, Search, Plus, FolderPlus, Download, Star, Terminal, Cpu, Radio, Clock, SplitSquareHorizontal, Play } from 'lucide-react'
+import { ChevronRight, ChevronDown, Folder, FolderOpen, Search, Plus, FolderPlus, Download, Star, Terminal, SquareTerminal, Cpu, Radio, Clock, SplitSquareHorizontal, Play } from 'lucide-react'
 import { useApp, newHost } from '../state'
 import { ENV_COLORS, ENV_LABELS, type Group, type Host } from '@shared/types'
 import { panes } from '../layout'
@@ -23,7 +23,15 @@ export function hostColor(h: Host, groups: Group[]): string | undefined {
 export function ProtoIcon({ p, size = 14 }: { p: Host['protocol']; size?: number }): JSX.Element {
   if (p === 'serial') return <Cpu size={size} />
   if (p === 'telnet') return <Radio size={size} />
+  if (p === 'local') return <SquareTerminal size={size} />
   return <Terminal size={size} />
+}
+
+/** 목록·툴팁에 쓰는 접속 대상 한 줄 */
+export function hostTarget(h: Host, withPort = false): string {
+  if (h.protocol === 'serial') return h.serial?.path ?? ''
+  if (h.protocol === 'local') return `로컬 · ${h.local?.cwd?.trim() || '~'}`
+  return `${h.username ? h.username + '@' : ''}${h.host}${withPort ? ':' + h.port : ''}`
 }
 
 function matches(h: Host, q: string, groups: Group[]): boolean {
@@ -124,13 +132,13 @@ export function Sidebar(): JSX.Element {
         onClick={() => setSelected(h.id)}
         onDoubleClick={() => st().openHost(h.id)}
         onContextMenu={(e) => hostMenu(e, h)}
-        title={`${h.alias}\n${h.protocol === 'serial' ? h.serial?.path : `${h.username ? h.username + '@' : ''}${h.host}:${h.port}`}${h.notes ? '\n' + h.notes : ''}`}
+        title={`${h.alias}\n${hostTarget(h, true)}${h.notes ? '\n' + h.notes : ''}`}
       >
         <span className="chev" />
         <span className="color-bar" style={{ background: color ?? 'transparent' }} />
         <span className="proto"><ProtoIcon p={h.protocol} size={13} /></span>
         <span className="n-label">{h.alias || h.host}</span>
-        <span className="n-sub">{h.protocol === 'serial' ? h.serial?.path : h.host}</span>
+        <span className="n-sub">{h.protocol === 'serial' ? h.serial?.path : h.protocol === 'local' ? h.local?.cwd?.trim() || '~' : h.host}</span>
         {live ? <span className="n-live"><span className="dot connected" style={{ width: 6, height: 6 }} />{live > 1 ? live : ''}</span> : null}
         <span className="n-hover">
           <button className="ibtn sm" title="분할로 연결" onClick={(e) => { e.stopPropagation(); st().openHost(h.id, 'row') }}><SplitSquareHorizontal size={13} /></button>

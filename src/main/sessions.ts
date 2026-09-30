@@ -8,6 +8,7 @@ import type { Transport } from './transports/types'
 import { SshTransport } from './transports/ssh'
 import { TelnetTransport } from './transports/telnet'
 import { SerialTransport } from './transports/serial'
+import { LocalTransport } from './transports/local'
 import { send } from './ui'
 import { store, dataDir } from './store'
 import { vault } from './vault'
@@ -44,6 +45,25 @@ export function resolveHostEnv(h: Host): Host['env'] {
 
 function adhocHost(t: AdhocTarget): Host {
   const protocol = t.protocol ?? 'ssh'
+  if (protocol === 'local') {
+    return {
+      id: 'adhoc-' + randomUUID(),
+      groupId: null,
+      alias: '로컬 터미널',
+      protocol,
+      host: '',
+      port: 0,
+      username: '',
+      authType: 'ask',
+      tags: [],
+      encoding: 'utf-8',
+      termType: 'xterm-256color',
+      keepaliveSec: 0,
+      forwards: [],
+      local: { cwd: t.cwd },
+      sort: 0
+    }
+  }
   return {
     id: 'adhoc-' + randomUUID(),
     groupId: null,
@@ -90,6 +110,7 @@ export class Session {
   private targetLabel(): string {
     const h = this.host
     if (h.protocol === 'serial') return `${h.serial?.path ?? '?'} @ ${h.serial?.baudRate ?? 9600}`
+    if (h.protocol === 'local') return `로컬 · ${h.local?.cwd?.trim() || '~'}`
     return `${h.username ? h.username + '@' : ''}${h.host}:${h.port}`
   }
 
@@ -115,8 +136,8 @@ export class Session {
   async connect(): Promise<void> {
     const h = this.host
     this.setState(this.retry ? 'reconnecting' : 'connecting')
-    this.info_(`${this.info.title} (${this.info.target}) 접속 중...`, '90')
-    const enc = h.encoding === 'cp949' ? 'euc-kr' : h.encoding || 'utf-8'
+    if (h.protocol !== 'local') this.info_(`${this.info.title} (${this.info.target}) 접속 중...`, '90')
+    const enc = this.encoding()
     this.decoder = iconv.getDecoder(enc) as unknown as iconv.DecoderStream
     try {
       let t: Transport
@@ -130,6 +151,12 @@ export class Session {
         })
         await st.start()
         t = st
+      } else if (h.protocol === 'local') {
+        const lt = new LocalTransport(h.local ?? {}, h.termType)
+        await lt.start(this.cols, this.rows)
+        if (lt.cwdFallback) this.info_(`시작 폴더(${h.local?.cwd})가 없어 홈 폴더에서 엽니다`, '33')
+        if (h.startupCommand) setTimeout(() => lt.write(Buffer.from(h.startupCommand!.replace(/\r?\n/g, '\r') + '\r')), 300)
+        t = lt
       } else if (h.protocol === 'telnet') {
         const tt = new TelnetTransport(h.host, h.port, h.termType)
         await tt.start(this.cols, this.rows)
@@ -145,12 +172,12 @@ export class Session {
       t.on('data', (d: Buffer) => this.onData(d))
       t.on('close', (reason?: string) => this.onClose(reason))
       this.setState('connected')
-      this.emitText('\x1b[2K\r')
+      if (h.protocol !== 'local') this.emitText('\x1b[2K\r')
       if (this.persistent) store.touchHost(h.id)
       if (store.get().settings.sessionLog) this.openLog()
     } catch (e) {
       const msg = (e as Error).message || String(e)
-      this.info_(`접속 실패: ${translateError(msg)}`, '31')
+      this.info_(`${h.protocol === 'local' ? '셸 실행 실패' : '접속 실패'}: ${translateError(msg)}`, '31')
       this.transport = null
       this.scheduleReconnect(true)
     }
@@ -192,6 +219,11 @@ export class Session {
     this.log?.end()
     this.log = null
     if (this.userClosed) return
+    if (this.host.protocol === 'local') {
+      this.setState('closed')
+      this.info_(`${reason ?? '셸이 종료되었습니다'} — Enter 키를 누르면 새 셸을 엽니다.`, '90')
+      return
+    }
     this.info_(reason ? `연결 끊김: ${reason}` : '연결이 끊어졌습니다', '33')
     this.scheduleReconnect(false)
   }
@@ -219,12 +251,19 @@ export class Session {
     this.connect()
   }
 
+  /** 로컬 셸은 항상 UTF-8 (pty 가 문자열로 주고받는다) */
+  private encoding(): string {
+    const h = this.host
+    if (h.protocol === 'local') return 'utf-8'
+    return h.encoding === 'cp949' ? 'euc-kr' : h.encoding || 'utf-8'
+  }
+
   write(data: string): void {
     if (!this.transport) {
       if (data === '\r' && this.info.state !== 'connecting') this.reconnectNow()
       return
     }
-    const enc = this.host.encoding === 'cp949' ? 'euc-kr' : this.host.encoding || 'utf-8'
+    const enc = this.encoding()
     this.transport.write(enc === 'utf-8' ? Buffer.from(data, 'utf8') : iconv.encode(data, enc))
   }
 

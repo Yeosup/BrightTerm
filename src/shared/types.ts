@@ -1,7 +1,7 @@
 // Shared types between main / preload / renderer
 
 export type Env = 'prod' | 'stage' | 'dev' | 'device' | 'none'
-export type Protocol = 'ssh' | 'telnet' | 'serial'
+export type Protocol = 'ssh' | 'telnet' | 'serial' | 'local'
 export type AuthType = 'password' | 'key' | 'agent' | 'ask'
 
 export interface Group {
@@ -34,6 +34,12 @@ export interface SerialOptions {
   localEcho: boolean
 }
 
+/** 로컬 터미널 — 이 PC 의 셸. 빈 값이면 기본 셸 / 홈 폴더 */
+export interface LocalOptions {
+  shell?: string
+  cwd?: string
+}
+
 export interface Host {
   id: string
   groupId: string | null
@@ -54,6 +60,7 @@ export interface Host {
   keepaliveSec: number
   forwards: PortForward[]
   serial?: SerialOptions
+  local?: LocalOptions
   notes?: string
   favorite?: boolean
   lastUsedAt?: number
@@ -156,6 +163,8 @@ export interface SessionInfo {
 
 export interface AdhocTarget {
   host: string
+  /** protocol 'local' 일 때 시작 폴더 */
+  cwd?: string
   port?: number
   username?: string
   protocol?: Protocol

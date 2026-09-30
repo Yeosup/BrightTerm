@@ -162,7 +162,7 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
     st().showMenu(e, [
       { label: '복사', shortcut: SC.copy, disabled: !hasSel, onClick: () => entry && api.clip.writeText(entry.term.getSelection()) },
       { label: '붙여넣기', shortcut: SC.paste, onClick: () => smartPaste(pane.sessionId) },
-      { label: '클립보드 이미지를 서버로 붙여넣기', shortcut: SC.pasteImage, disabled: !info?.canSftp, onClick: () => smartPaste(pane.sessionId, true) },
+      { label: info?.protocol === 'local' ? '클립보드 이미지 붙여넣기 (경로 입력)' : '클립보드 이미지를 서버로 붙여넣기', shortcut: SC.pasteImage, disabled: !info?.canSftp && info?.protocol !== 'local', onClick: () => smartPaste(pane.sessionId, true) },
       { separator: true },
       { label: '모두 선택', onClick: () => entry?.term.selectAll() },
       { label: '화면 지우기', onClick: () => entry?.term.clear() },
@@ -209,7 +209,7 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
           {tab.broadcast && <Radio size={12} color="var(--warn)" />}
           <span className="ph-actions">
             {info && info.state !== 'connected' && <button className="ibtn sm" title="다시 접속" onClick={() => api.session.reconnect(pane.sessionId)}><RotateCw size={13} /></button>}
-            {info?.canSftp && <button className="ibtn sm" title={`클립보드 이미지 → 서버 업로드 후 경로 입력 (${SC.pasteImage})`} onClick={() => smartPaste(pane.sessionId, true)}><ImageUp size={13} /></button>}
+            {(info?.canSftp || info?.protocol === 'local') && <button className="ibtn sm" title={info?.protocol === 'local' ? `클립보드 이미지를 저장하고 경로 입력 (${SC.pasteImage})` : `클립보드 이미지 → 서버 업로드 후 경로 입력 (${SC.pasteImage})`} onClick={() => smartPaste(pane.sessionId, true)}><ImageUp size={13} /></button>}
             <button className="ibtn sm" title={`찾기 (${SC.find})`} onClick={() => { setFind(''); setTimeout(() => findRef.current?.focus(), 20) }}><Search size={13} /></button>
             {info?.canSftp && <button className="ibtn sm" title={`SFTP (${SC.sftp})`} onClick={() => { st().focusPane(tab.id, pane.id); useApp.setState({ rightPanel: 'sftp' }) }}><FolderTree size={13} /></button>}
             <button className="ibtn sm" title={`오른쪽으로 분할 (${SC.splitRight})`} onClick={() => { st().focusPane(tab.id, pane.id); st().duplicatePane('row') }}><Columns2 size={13} /></button>
@@ -239,7 +239,7 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
         </div>
       )}
       {dropping && (
-        <div className="pane-drop"><div><ImageUp size={18} /> {info?.canSftp ? `서버(${settings.uploadDir})로 업로드하고 경로를 입력합니다` : '파일 경로를 입력합니다'}</div></div>
+        <div className="pane-drop"><div><ImageUp size={18} /> {info?.canSftp ? `서버(${settings.uploadDir})로 업로드하고 경로를 입력합니다` : info?.protocol === 'local' ? '파일 경로를 입력합니다 (이미지는 저장 후 경로)' : '파일 경로를 입력합니다'}</div></div>
       )}
     </div>
   )

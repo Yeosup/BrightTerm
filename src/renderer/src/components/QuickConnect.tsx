@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Zap, Settings, Download, Plus, Lock, SunMoon, LayoutGrid, FolderPlus } from 'lucide-react'
+import { Zap, Settings, Download, Plus, Lock, SunMoon, LayoutGrid, FolderPlus, SquareTerminal } from 'lucide-react'
 import { useApp } from '../state'
 import { api } from '../api'
-import { hostColor, ProtoIcon } from './Sidebar'
+import { hostColor, hostTarget, ProtoIcon } from './Sidebar'
 import type { Host } from '@shared/types'
 import { SC, isMac, modKey } from '../platform'
 
@@ -46,6 +46,7 @@ export function QuickConnect(): JSX.Element {
     if (raw.startsWith('>')) {
       const c = raw.slice(1).trim().toLowerCase()
       const cmds: Item[] = [
+        { key: 'c-local', icon: <SquareTerminal size={15} />, title: '새 로컬 터미널', run: (w) => { st().openAdhoc({ host: '', protocol: 'local' }, w === 'tab' ? 'tab' : w); close() } },
         { key: 'c-new', icon: <Plus size={15} />, title: '새 서버 등록', run: () => useApp.setState({ dialog: { kind: 'host', groupId: null } }) },
         { key: 'c-folder', icon: <FolderPlus size={15} />, title: '새 폴더', run: () => useApp.setState({ dialog: { kind: 'group', parentId: null } }) },
         { key: 'c-import', icon: <Download size={15} />, title: isMac ? 'SSH config / PuTTY 세션 가져오기' : 'PuTTY / SSH config 가져오기', run: () => useApp.setState({ dialog: { kind: 'import' } }) },
@@ -67,6 +68,10 @@ export function QuickConnect(): JSX.Element {
         run: (w) => { st().openAdhoc({ host: m[3], port: m[4] ? +m[4] : undefined, username: m[2], protocol }, w === 'tab' ? 'tab' : w); close() }
       })
     }
+    // 비었거나 '로컬'·'local' 을 치면 맨 위에 — ⌘K → Enter 기본 동작은 그대로 두려고 빈 입력에서는 맨 아래
+    const localItem: Item = { key: 'local', icon: <SquareTerminal size={15} />, title: '새 로컬 터미널', sub: `이 PC의 셸 · ${SC.localTerm}`, run: (w) => { st().openAdhoc({ host: '', protocol: 'local' }, w === 'tab' ? 'tab' : w); close() } }
+    const wantsLocal = /^(로컬|local|터미널|term|shell|셸)/i.test(raw)
+    if (wantsLocal) out.push(localItem)
     const gname = (id: string | null): string => groups.find((g) => g.id === id)?.name ?? ''
     const scored = hosts
       .map((h) => ({ h, s: score(h, raw, gname(h.groupId)) }))
@@ -79,10 +84,11 @@ export function QuickConnect(): JSX.Element {
         icon: <ProtoIcon p={h.protocol} size={15} />,
         color: hostColor(h, groups),
         title: h.alias,
-        sub: `${h.protocol === 'serial' ? h.serial?.path : `${h.username ? h.username + '@' : ''}${h.host}${h.port !== 22 ? ':' + h.port : ''}`}${gname(h.groupId) ? ' · ' + gname(h.groupId) : ''}`,
+        sub: `${h.protocol === 'ssh' || h.protocol === 'telnet' ? `${hostTarget(h)}${h.port !== 22 ? ':' + h.port : ''}` : hostTarget(h)}${gname(h.groupId) ? ' · ' + gname(h.groupId) : ''}`,
         run: (w) => { st().openHost(h.id, w === 'tab' ? 'tab' : w); close() }
       })
     }
+    if (!raw) out.push(localItem)
     return out
   }, [q, hosts, groups, settings.theme])
 

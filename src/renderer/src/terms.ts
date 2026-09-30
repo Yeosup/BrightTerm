@@ -305,6 +305,15 @@ async function insertPaths(sessionId: string, paths: string[]): Promise<void> {
 export async function uploadAndInsert(sessionId: string, src: { kind: 'clipboardImage' } | { kind: 'files'; paths: string[] }): Promise<void> {
   const st = useApp.getState()
   const info = st.sessions[sessionId]
+  if (info?.protocol === 'local') {
+    // 로컬 셸: 서버로 올릴 필요 없이 이미지는 이 PC 에 저장한 경로, 파일은 원래 경로를 넣는다
+    try {
+      await insertPaths(sessionId, await api.local.saveForPrompt(src))
+    } catch (err) {
+      st.toast('error', (err as Error).message)
+    }
+    return
+  }
   if (!info?.canSftp || info.state !== 'connected') {
     if (src.kind === 'files') return insertPaths(sessionId, src.paths)
     st.toast('error', '이미지 전송은 연결된 SSH 세션에서만 가능합니다')

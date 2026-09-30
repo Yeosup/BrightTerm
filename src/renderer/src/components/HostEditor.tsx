@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { KeyRound, Lock, Plus, Trash2, RefreshCw, FileKey } from 'lucide-react'
+import { KeyRound, Lock, Plus, Trash2, RefreshCw, FileKey, FolderOpen } from 'lucide-react'
 import { useApp, newHost } from '../state'
 import { api } from '../api'
 import { Modal, Field, Seg, ColorPick, Switch } from './ui'
@@ -31,6 +31,7 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
   const [passphrase, setPassphrase] = useState('')
   const [credMode, setCredMode] = useState<'own' | 'shared'>('own')
   const [ports, setPorts] = useState<{ path: string; label: string }[]>([])
+  const [shells, setShells] = useState<{ path: string; label: string }[]>([])
   const [err, setErr] = useState('')
   const st = useApp.getState
 
@@ -42,13 +43,21 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
   const set = <K extends keyof Host>(k: K, v: Host[K]): void => setH((x) => ({ ...x, [k]: v }))
   const refreshPorts = (): void => { api.serial.list().then(setPorts) }
   useEffect(() => { if (h.protocol === 'serial') refreshPorts() }, [h.protocol])
+  useEffect(() => { if (h.protocol === 'local' && !shells.length) api.local.shells().then(setShells) }, [h.protocol])
+  const setLocal = (p: Partial<NonNullable<Host['local']>>): void => set('local', { ...h.local, ...p })
+  const pickDir = async (): Promise<void> => {
+    const d = await api.dialog.chooseDir()
+    if (d) setLocal({ cwd: d })
+  }
 
   const close = (): void => useApp.setState({ dialog: null })
 
   const save = async (connect = false): Promise<void> => {
     setErr('')
-    const out = { ...h, alias: h.alias.trim() || (h.protocol === 'serial' ? h.serial?.path ?? 'Serial' : h.host.trim()), host: h.host.trim(), username: h.username.trim() }
-    if (out.protocol !== 'serial' && !out.host) { setTab('basic'); return setErr('호스트 주소를 입력하세요') }
+    const localName = h.local?.cwd?.trim().replace(/[\\/]+$/, '').split(/[\\/]/).pop() || '로컬 터미널'
+    const out = { ...h, alias: h.alias.trim() || (h.protocol === 'serial' ? h.serial?.path ?? 'Serial' : h.protocol === 'local' ? localName : h.host.trim()), host: h.host.trim(), username: h.username.trim() }
+    if (out.protocol === 'local') Object.assign(out, { host: '', port: 0, username: '', authType: 'ask', credentialId: null, jumpHostId: null, forwards: [], encoding: 'utf-8', local: { shell: h.local?.shell?.trim() || undefined, cwd: h.local?.cwd?.trim() || undefined } })
+    if (out.protocol !== 'serial' && out.protocol !== 'local' && !out.host) { setTab('basic'); return setErr('호스트 주소를 입력하세요') }
     if (out.protocol === 'serial' && !out.serial?.path) { setTab('basic'); return setErr('시리얼 포트를 선택하세요') }
     try {
       const needsSecret = (out.authType === 'password' && password) || (out.authType === 'key' && keyText)
@@ -108,13 +117,28 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
         {tab === 'basic' && (
           <>
             <Field label="프로토콜">
-              <Seg value={h.protocol} onChange={(v) => { set('protocol', v); if (v === 'telnet' && h.port === 22) set('port', 23); if (v === 'ssh' && h.port === 23) set('port', 22); if (v === 'serial' && !h.serial) set('serial', DEFAULT_SERIAL); if (v === 'serial' && (!h.env || h.env === 'none')) set('env', 'device') }}
-                options={[{ value: 'ssh', label: 'SSH' }, { value: 'telnet', label: 'Telnet' }, { value: 'serial', label: isMac ? '시리얼 (USB/RS-485)' : '시리얼 (COM/RS-485)' }]} />
+              <Seg value={h.protocol} onChange={(v) => { set('protocol', v); if (v === 'telnet' && h.port === 22) set('port', 23); if (v === 'ssh' && h.port === 23) set('port', 22); if (v === 'serial' && !h.serial) set('serial', DEFAULT_SERIAL); if (v === 'serial' && (!h.env || h.env === 'none')) set('env', 'device'); if (v !== 'local' && h.port === 0) set('port', v === 'telnet' ? 23 : 22) }}
+                options={[{ value: 'ssh', label: 'SSH' }, { value: 'telnet', label: 'Telnet' }, { value: 'serial', label: isMac ? '시리얼 (USB/RS-485)' : '시리얼 (COM/RS-485)' }, { value: 'local', label: '로컬 (이 PC)' }]} />
             </Field>
             <Field label="별칭 (탭·목록에 표시될 이름)">
               <input className="input" autoFocus value={h.alias} onChange={(e) => set('alias', e.target.value)} placeholder="예: 운영-WEB01" />
             </Field>
-            {h.protocol !== 'serial' ? (
+            {h.protocol === 'local' ? (
+              <div className="grid2">
+                <Field label="시작 폴더" hint="비워 두면 홈 폴더에서 열립니다">
+                  <div className="row">
+                    <input className="input mono grow" value={h.local?.cwd ?? ''} onChange={(e) => setLocal({ cwd: e.target.value })} placeholder={isMac ? '~/Work/프로젝트' : 'C:\\Work\\프로젝트'} />
+                    <button className="btn" onClick={pickDir} title="폴더 선택"><FolderOpen size={14} /></button>
+                  </div>
+                </Field>
+                <Field label="셸">
+                  <select className="select" value={h.local?.shell ?? ''} onChange={(e) => setLocal({ shell: e.target.value || undefined })}>
+                    <option value="">기본 ({shells[0]?.label ?? '…'})</option>
+                    {shells.slice(1).map((s) => <option key={s.path} value={s.path}>{s.label}</option>)}
+                  </select>
+                </Field>
+              </div>
+            ) : h.protocol !== 'serial' ? (
               <div className="grid3">
                 <Field label="호스트 (IP 또는 도메인)">
                   <input className="input mono" value={h.host} onChange={(e) => {
@@ -232,9 +256,12 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
                 </select>
               </Field>
             )}
-            <Field label="접속 후 자동 실행 명령" hint="예: cd /var/www && sudo -i">
+            <Field label={h.protocol === 'local' ? '셸 시작 후 자동 실행 명령' : '접속 후 자동 실행 명령'} hint={h.protocol === 'local' ? '예: nvm use && claude' : '예: cd /var/www && sudo -i'}>
               <input className="input mono" value={h.startupCommand ?? ''} onChange={(e) => set('startupCommand', e.target.value)} />
             </Field>
+            {h.protocol === 'local' ? (
+              <Field label="터미널 종류"><input className="input mono" value={h.termType} onChange={(e) => set('termType', e.target.value)} /></Field>
+            ) : (
             <div className="grid3">
               <Field label="문자 인코딩">
                 <select className="select" value={h.encoding} onChange={(e) => set('encoding', e.target.value as Host['encoding'])}>
@@ -244,6 +271,7 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
               <Field label="터미널 종류"><input className="input mono" value={h.termType} onChange={(e) => set('termType', e.target.value)} /></Field>
               <Field label="Keepalive (초)"><input className="input mono" type="number" value={h.keepaliveSec} onChange={(e) => set('keepaliveSec', +e.target.value || 0)} /></Field>
             </div>
+            )}
           </>
         )}
 

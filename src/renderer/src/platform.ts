@@ -13,7 +13,7 @@ export type Action =
   | 'broadcast' | 'sidebar' | 'moveTabLeft' | 'moveTabRight' | 'nextTab' | 'prevTab'
   | 'tab1' | 'tab2' | 'tab3' | 'tab4' | 'tab5' | 'tab6' | 'tab7' | 'tab8' | 'tab9'
   | 'paneLeft' | 'paneRight' | 'paneUp' | 'paneDown' | 'fontUp' | 'fontDown' | 'fontReset'
-  | 'settings' | 'import' | 'fullscreen'
+  | 'settings' | 'import' | 'fullscreen' | 'localTerm'
 
 /** The platform's primary modifier: ⌘ on macOS, Ctrl elsewhere. */
 export function modKey(e: { ctrlKey: boolean; metaKey: boolean }): boolean {
@@ -50,7 +50,7 @@ const WIN: Record<string, Action> = {
   'mod+shift+f': 'find', 'mod+shift+s': 'sftp', 'mod+shift+b': 'broadcast', 'mod+shift+l': 'sidebar',
   'mod+shift+arrowleft': 'moveTabLeft', 'mod+shift+arrowright': 'moveTabRight', 'mod+tab': 'nextTab', 'mod+shift+tab': 'prevTab',
   'alt+arrowleft': 'paneLeft', 'alt+arrowright': 'paneRight', 'alt+arrowup': 'paneUp', 'alt+arrowdown': 'paneDown',
-  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', f11: 'fullscreen'
+  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', f11: 'fullscreen', 'mod+alt+t': 'localTerm'
 }
 
 const MAC: Record<string, Action> = {
@@ -60,7 +60,8 @@ const MAC: Record<string, Action> = {
   'mod+shift+arrowleft': 'moveTabLeft', 'mod+shift+arrowright': 'moveTabRight',
   'mod+shift+]': 'nextTab', 'mod+shift+[': 'prevTab', 'ctrl+tab': 'nextTab', 'ctrl+shift+tab': 'prevTab',
   'mod+alt+arrowleft': 'paneLeft', 'mod+alt+arrowright': 'paneRight', 'mod+alt+arrowup': 'paneUp', 'mod+alt+arrowdown': 'paneDown',
-  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', 'mod+,': 'settings', 'mod+ctrl+f': 'fullscreen'
+  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', 'mod+,': 'settings', 'mod+ctrl+f': 'fullscreen',
+  'mod+shift+t': 'localTerm'
 }
 for (let i = 1; i <= 9; i++) {
   WIN[`mod+${i}`] = `tab${i}` as Action
@@ -80,6 +81,7 @@ const L = (win: string, mac: string): string => (isMac ? mac : win)
 export const SC = {
   quick: L('Ctrl+K', '⌘K'),
   newTab: L('Ctrl+Shift+T', '⌘T'),
+  localTerm: L('Ctrl+Alt+T', '⇧⌘T'),
   closePane: L('Ctrl+Shift+W', '⌘W'),
   splitRight: L('Ctrl+Shift+D', '⌘D'),
   splitDown: L('Ctrl+Shift+E', '⇧⌘D'),

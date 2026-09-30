@@ -48,6 +48,7 @@ export function runAction(a: Action): boolean {
   switch (a) {
     case 'quick': useApp.setState({ dialog: st.dialog?.kind === 'quick' ? null : { kind: 'quick' } }); break
     case 'quickOpen': useApp.setState({ dialog: { kind: 'quick' } }); break
+    case 'localTerm': if (st.dialog?.kind === 'quick') useApp.setState({ dialog: null }); st.openAdhoc({ host: '', protocol: 'local' }); break
     case 'closePane': if (fp) st.closePane(fp.id); break
     case 'splitRight': st.duplicatePane('row'); break
     case 'splitDown': st.duplicatePane('col'); break

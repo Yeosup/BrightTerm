@@ -307,6 +307,7 @@ export const useApp = create<State>((set, get) => ({
     const info = get().focusedSession()
     if (!info) return
     if (info.hostId) return get().openHost(info.hostId, where)
+    if (info.protocol === 'local') return get().openAdhoc({ host: '', protocol: 'local', cwd: info.target.replace(/^로컬 · /, '') }, where)
     const m = info.target.match(/^(?:(.+)@)?(.+):(\d+)$/)
     if (m) return get().openAdhoc({ username: m[1], host: m[2], port: +m[3], protocol: info.protocol }, where)
   },

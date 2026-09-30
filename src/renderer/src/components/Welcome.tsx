@@ -1,6 +1,6 @@
-import { Plus, Download, Zap } from 'lucide-react'
+import { Plus, Download, Zap, SquareTerminal } from 'lucide-react'
 import { useApp } from '../state'
-import { hostColor, ProtoIcon } from './Sidebar'
+import { hostColor, hostTarget, ProtoIcon } from './Sidebar'
 import { SC, isMac } from '../platform'
 import logo from '../assets/logo.png'
 import { AdBanner } from './AdBanner'
@@ -8,6 +8,7 @@ import { AdBanner } from './AdBanner'
 export const SHORTCUTS: [string, string][] = [
   ['빠른 접속 / 명령', SC.quick],
   ['새 탭 (빠른 접속)', SC.newTab],
+  ['새 로컬 터미널', SC.localTerm],
   [isMac ? '패널 닫기' : '탭 닫기', SC.closePane],
   ['오른쪽 분할 (같은 서버)', SC.splitRight],
   ['아래 분할 (같은 서버)', SC.splitDown],
@@ -38,6 +39,7 @@ export function Welcome(): JSX.Element {
         <p>서버를 더블클릭하거나 <span className="kbd">{SC.quick}</span> 로 바로 접속하세요.</p>
         <div className="actions">
           <button className="btn primary" onClick={() => useApp.setState({ dialog: { kind: 'quick' } })}><Zap size={15} />빠른 접속</button>
+          <button className="btn" onClick={() => useApp.getState().openAdhoc({ host: '', protocol: 'local' })} title={SC.localTerm}><SquareTerminal size={15} />로컬 터미널</button>
           <button className="btn" onClick={() => useApp.setState({ dialog: { kind: 'host', groupId: null } })}><Plus size={15} />새 서버 등록</button>
           <button className="btn" onClick={() => useApp.setState({ dialog: { kind: 'import' } })}><Download size={15} />{isMac ? 'SSH config 가져오기' : 'PuTTY에서 가져오기'}</button>
         </div>
@@ -50,7 +52,7 @@ export function Welcome(): JSX.Element {
                 <ProtoIcon p={h.protocol} />
                 <div style={{ minWidth: 0 }}>
                   <b>{h.alias}</b>
-                  <span>{h.protocol === 'serial' ? h.serial?.path : `${h.username ? h.username + '@' : ''}${h.host}`}</span>
+                  <span>{hostTarget(h)}</span>
                 </div>
               </div>
             ))}

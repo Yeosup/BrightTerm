@@ -7,6 +7,7 @@ import type { ClipboardInfo, SftpEntry, Transfer } from '@shared/types'
 import { sessions } from './sessions'
 import { send } from './ui'
 import { store } from './store'
+import { expandHome } from './transports/local'
 
 function sftpOf(sessionId: string): Promise<SFTPWrapper> {
   const s = sessions.get(sessionId)
@@ -396,4 +397,41 @@ export function forgetSession(sessionId: string): void {
   homeCache.delete(sessionId)
   queues.delete(sessionId)
   for (const [k, w] of watchers) if (k.startsWith(sessionId + ':')) { w.close(); watchers.delete(k) }
+}
+
+/**
+ * 로컬 터미널용 붙여넣기 — 서버로 올릴 필요가 없으니 이미지는 이 PC 의 업로드 폴더에 저장하고 그 경로를,
+ * 파일은 원래 경로를 그대로 돌려준다. 폴더·보관 기간은 원격과 같은 설정을 쓴다.
+ */
+export async function saveForPromptLocal(source: { kind: 'clipboardImage' } | { kind: 'files'; paths: string[] } | { kind: 'buffer'; name: string; data: Uint8Array }): Promise<string[]> {
+  if (source.kind === 'files') return source.paths
+  const settings = store.get().settings
+  const dir = expandHome(settings.uploadDir || '~/.brightterm/uploads')
+  await fs.mkdir(dir, { recursive: true })
+  const rand = Math.random().toString(36).slice(2, 6)
+  let data: Buffer
+  let ext = '.png'
+  if (source.kind === 'clipboardImage') {
+    const img = clipboard.readImage()
+    if (img.isEmpty()) throw new Error('클립보드에 이미지가 없습니다')
+    data = img.toPNG()
+  } else {
+    data = Buffer.from(source.data)
+    ext = extname(source.name) || '.png'
+  }
+  const file = join(dir, `bt-${stamp()}-${rand}${ext}`)
+  await fs.writeFile(file, data)
+  cleanupLocal(dir, settings.uploadCleanupDays).catch(() => {})
+  return [file]
+}
+
+async function cleanupLocal(dir: string, days: number): Promise<void> {
+  if (!days) return
+  const cutoff = Date.now() - days * 86400000
+  for (const f of await fs.readdir(dir)) {
+    if (!f.startsWith('bt-')) continue
+    const p = join(dir, f)
+    const st = await fs.stat(p)
+    if (st.isFile() && st.mtimeMs < cutoff) await fs.unlink(p)
+  }
 }

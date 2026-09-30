@@ -40,7 +40,7 @@ export function StatusBar(): JSX.Element {
         <span className="sb-item muted">연결된 세션 없음</span>
       )}
       <span className="sb-fill" />
-      {s?.canSftp && s.state === 'connected' && <span className="sb-item muted" title="클립보드 이미지를 서버에 올리고 경로를 입력합니다 (Claude Code 등 CLI에서 이미지 첨부)"><ImageUp size={12} />이미지 붙여넣기 {SC.paste}</span>}
+      {(s?.canSftp || s?.protocol === 'local') && s.state === 'connected' && <span className="sb-item muted" title={s.protocol === 'local' ? '클립보드 이미지를 이 PC에 저장하고 경로를 입력합니다 (Claude Code 등 CLI에서 이미지 첨부)' : '클립보드 이미지를 서버에 올리고 경로를 입력합니다 (Claude Code 등 CLI에서 이미지 첨부)'}><ImageUp size={12} />이미지 붙여넣기 {SC.paste}</span>}
       {host && <span className="sb-item">{(host.encoding || 'utf-8').toUpperCase()}</span>}
       {e && <span className="sb-item">{e.term.cols}×{e.term.rows}</span>}
       <span className="sb-item sb-btn" title={vault.unlocked ? '클릭하면 볼트를 잠급니다' : '볼트 잠김'} onClick={() => vault.unlocked && api.vault.lock()}>

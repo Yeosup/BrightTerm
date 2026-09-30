@@ -91,6 +91,11 @@ export const api = {
     apply: (c: ImportCandidate[], group: string) => bt.call<{ hosts: number; keys: number; skipped: string[] }>('import:apply', c, group)
   },
   serial: { list: () => bt.call<{ path: string; label: string }[]>('serial:list') },
+  local: {
+    shells: () => bt.call<{ path: string; label: string }[]>('local:shells'),
+    saveForPrompt: (src: { kind: 'clipboardImage' } | { kind: 'files'; paths: string[] } | { kind: 'buffer'; name: string; data: Uint8Array }) =>
+      bt.call<string[]>('local:saveForPrompt', src)
+  },
   backup: {
     export: () => bt.call<string | false>('backup:export'),
     import: () => bt.call<boolean>('backup:import')

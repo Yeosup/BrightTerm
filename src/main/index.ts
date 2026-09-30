@@ -9,6 +9,7 @@ import * as sftp from './sftp'
 import { setWindow, respond, send } from './ui'
 import { scanPutty, scanSshConfig, scanPuttyHostKeys } from './importers'
 import { listSerialPorts } from './transports/serial'
+import { listShells } from './transports/local'
 import { scanAws } from './aws'
 import { cachedBanners, refreshBanners } from './ads'
 import type { AdhocTarget, CredentialInput, Group, Host, ImportCandidate, StoreData } from '@shared/types'
@@ -145,6 +146,8 @@ function registerIpc(): void {
   })
   handle('sftp:preview', (id: string, path: string) => sftp.preview(id, path))
   handle('sftp:edit', (id: string, path: string) => sftp.editRemote(id, path))
+  handle('local:saveForPrompt', (src: Parameters<typeof sftp.saveForPromptLocal>[0]) => sftp.saveForPromptLocal(src))
+  handle('local:shells', () => listShells())
   handle('sftp:uploadForPrompt', (id: string, src: Parameters<typeof sftp.uploadForPrompt>[1]) => sftp.uploadForPrompt(id, src))
 
   // clipboard
@@ -247,6 +250,7 @@ function buildMacMenu(): Menu {
       label: '셸',
       submenu: [
         act('새 연결 / 빠른 접속', 'quick', 'Cmd+T'),
+        act('새 로컬 터미널', 'localTerm', 'Cmd+Shift+T'),
         act('명령 팔레트', 'quickOpen', 'Cmd+Shift+P'),
         { type: 'separator' },
         act('오른쪽으로 분할', 'splitRight', 'Cmd+D'),
