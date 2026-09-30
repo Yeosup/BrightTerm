@@ -1,9 +1,9 @@
 {
   "name": "brightterm",
   "productName": "BrightTerm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BrightTerm - SSH / Serial / Telnet terminal with vault, SFTP and image paste",
-  "author": "Balkeunter",
+  "author": "Dany Kim",
   "main": "out/main/index.js",
   "license": "MIT",
   "private": true,

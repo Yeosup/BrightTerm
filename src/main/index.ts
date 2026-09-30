@@ -384,6 +384,14 @@ function startAutoLock(): void {
 
 app.whenReady().then(() => {
   app.setAppUserModelId('kr.balkeunter.brightterm')
+  // macOS "BrightTerm 정보" 창
+  app.setAboutPanelOptions({
+    applicationName: 'BrightTerm',
+    applicationVersion: app.getVersion(),
+    version: '',
+    copyright: 'Copyright © 2026 Dany Kim',
+    credits: '개발: Dany Kim'
+  })
   Menu.setApplicationMenu(process.platform === 'darwin' ? buildMacMenu() : null)
   store.load()
   vault.init()

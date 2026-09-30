@@ -186,6 +186,8 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
                   <div className="muted">SSH · Telnet · Serial 터미널 — 밝은터</div>
                 </div>
               </div>
+              <Field label="개발자"><div>Dany Kim</div></Field>
+              <Field label="라이선스"><div className="muted">MIT · Copyright © 2026 Dany Kim</div></Field>
               <Field label="데이터 폴더"><div className="code">{info?.dataDir}</div></Field>
               <h3>단축키</h3>
               <div className="shortcut-list" style={{ marginTop: 0 }}>

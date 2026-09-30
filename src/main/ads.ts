@@ -12,8 +12,9 @@ import type { Banner, BannerSlot } from '@shared/types'
  *  - https 만, 크기 상한, 이미지 형식 확인. 이미지는 메인이 받아 data: URL 로 넘겨 렌더러는 외부에 접속하지 않는다
  *  - 실패하면 조용히 캐시 → 앱 내장 기본 배너 순으로 떨어진다
  */
-// 배너 교체는 이 파일(저장소 banners/feed.json)만 고치면 된다 — 앱 재배포 불필요. 빈 문자열로 덮으면 끈다
-export const BANNER_FEED_URL = process.env.BRIGHTTERM_BANNER_FEED ?? 'https://raw.githubusercontent.com/Yeosup/BrightTerm/main/banners/feed.json'
+// 배너는 모두의 앱 관리자(moduapp.kr/admin/banners)에서 관리 — 앱 재배포 불필요. 빈 문자열로 덮으면 끈다
+// (1.0.0 은 저장소 banners/feed.json 을 읽는다 — 그 파일은 구버전용으로 남겨 둔다)
+export const BANNER_FEED_URL = process.env.BRIGHTTERM_BANNER_FEED ?? 'https://moduapp.kr/api/banners/brightterm'
 
 const MAX_FEED = 64 * 1024
 const MAX_IMAGE = 768 * 1024

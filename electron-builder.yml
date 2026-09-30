@@ -1,6 +1,6 @@
 appId: kr.balkeunter.brightterm
 productName: BrightTerm
-copyright: Copyright (c) 2026 Balkeunter
+copyright: Copyright (c) 2026 Dany Kim
 directories:
   buildResources: build
   output: dist

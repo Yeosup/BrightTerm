@@ -86,7 +86,7 @@ Windows에서 `vim` 등에 Ctrl+V를 보내야 한다면 설정 → 입력에서
 환영 화면과 서버 목록 아래에 배너가 하나씩 표시됩니다(`광고` 표시). 터미널 작업 영역에는 넣지 않습니다.
 
 - 앱에 기본 배너가 들어 있어 오프라인·사내망에서도 그대로 보입니다.
-- 원격 목록은 이 저장소의 [`banners/feed.json`](./banners/feed.json)입니다. 이 파일을 고쳐 push 하면 앱을 다시 배포하지 않아도 배너가 바뀝니다. 앱은 시작할 때 한 번 받아 캐시합니다(다른 주소를 쓰려면 `BRIGHTTERM_BANNER_FEED` 환경 변수, 빈 값이면 끔). 실패하면 캐시 → 기본 배너 순으로 조용히 넘어갑니다.
+- 원격 목록은 모두의 앱(`https://moduapp.kr/api/banners/brightterm`)에서 받습니다. 관리 화면에서 바꾸면 앱을 다시 배포하지 않아도 배너가 바뀝니다(1.0.0 은 이 저장소의 [`banners/feed.json`](./banners/feed.json)을 읽습니다). 앱은 시작할 때 한 번 받아 캐시합니다(다른 주소를 쓰려면 `BRIGHTTERM_BANNER_FEED` 환경 변수, 빈 값이면 끔). 실패하면 캐시 → 기본 배너 순으로 조용히 넘어갑니다.
 - 목록 형식:
 
 ```json
@@ -131,3 +131,5 @@ APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed  # Develop
 ## 라이선스
 
 [MIT](./LICENSE) — 누구나 자유롭게 쓰고, 고치고, 배포할 수 있습니다.
+
+만든 사람: **Dany Kim**
