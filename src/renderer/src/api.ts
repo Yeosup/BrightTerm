@@ -104,6 +104,7 @@ export const api = {
     info: () => bt.call<{ version: string; platform: string; dataDir: string }>('app:info'),
     titlebar: (bg: string, fg: string) => bt.call<void>('app:titlebar', bg, fg),
     openLogs: () => bt.call<void>('app:openLogs'),
+    openLegal: (kind: 'license' | 'notices' | 'chromium') => bt.call<void>('app:openLegal', kind),
     openExternal: (u: string) => bt.call<void>('app:openExternal', u),
     toggleFullScreen: () => bt.call<void>('app:toggleFullScreen'),
     openBanner: (u: string) => bt.call<void>('app:openBanner', u)

@@ -213,6 +213,14 @@ function registerIpc(): void {
     nativeTheme.themeSource = store.get().settings.theme === 'light' ? 'light' : 'dark'
   })
   handle('app:openLogs', () => shell.openPath(join(dataDir(), 'logs')))
+  // 라이선스 전문·제3자 고지 — 패키지 앱은 resources/legal/, 개발 중에는 저장소 루트 파일
+  handle('app:openLegal', async (kind: 'license' | 'notices' | 'chromium') => {
+    const files = { license: ['LICENSE.txt', 'LICENSE'], notices: ['THIRD_PARTY_NOTICES.txt', 'THIRD_PARTY_NOTICES.txt'], chromium: ['LICENSES.chromium.html', 'node_modules/electron/dist/LICENSES.chromium.html'] }
+    const f = files[kind]
+    if (!f) return
+    const err = await shell.openPath(app.isPackaged ? join(process.resourcesPath, 'legal', f[0]) : join(app.getAppPath(), f[1]))
+    if (err) throw new Error(err)
+  })
   handle('app:openExternal', (url: string) => { if (/^https?:\/\//.test(url)) shell.openExternal(url) })
   handle('ads:get', () => cachedBanners())
   handle('app:openBanner', (url: string) => { if (/^https:\/\//.test(url)) shell.openExternal(url) })
@@ -394,7 +402,7 @@ app.whenReady().then(() => {
     applicationVersion: app.getVersion(),
     version: '',
     copyright: 'Copyright © 2026 Dany Kim',
-    credits: '개발: Dany Kim'
+    credits: '개발·저작권자: Dany Kim\n개인·회사 업무 사용 무료 · 유료 재배포·유료 번들은 별도 허락 필요\nBrightTerm Source-Available License 1.0'
   })
   Menu.setApplicationMenu(process.platform === 'darwin' ? buildMacMenu() : null)
   store.load()

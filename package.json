@@ -1,23 +1,24 @@
 {
   "name": "brightterm",
   "productName": "BrightTerm",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "BrightTerm - SSH / Serial / Telnet terminal with vault, SFTP and image paste",
   "author": "Dany Kim",
   "main": "out/main/index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "scripts": {
     "postinstall": "node scripts/fix-node-pty.mjs",
+    "notices": "node scripts/gen-notices.mjs",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "start": "electron-vite preview",
-    "dist:win": "electron-vite build && electron-builder --win --x64",
-    "dist:dir": "electron-vite build && electron-builder --win --x64 --dir",
-    "dist:mac": "electron-vite build && electron-builder --mac",
-    "dist:mac:dir": "electron-vite build && electron-builder --mac --dir",
-    "dist:mac:signed": "electron-vite build && electron-builder --mac -c electron-builder.signed.yml"
+    "dist:win": "npm run notices && electron-vite build && electron-builder --win --x64",
+    "dist:dir": "npm run notices && electron-vite build && electron-builder --win --x64 --dir",
+    "dist:mac": "npm run notices && electron-vite build && electron-builder --mac",
+    "dist:mac:dir": "npm run notices && electron-vite build && electron-builder --mac --dir",
+    "dist:mac:signed": "npm run notices && electron-vite build && electron-builder --mac -c electron-builder.signed.yml"
   },
   "dependencies": {
     "iconv-lite": "^0.7.3",

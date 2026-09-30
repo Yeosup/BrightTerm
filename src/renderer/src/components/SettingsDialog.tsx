@@ -186,8 +186,16 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
                   <div className="muted">SSH · Telnet · Serial · 로컬 터미널 — 밝은터</div>
                 </div>
               </div>
-              <Field label="개발자"><div>Dany Kim</div></Field>
-              <Field label="라이선스"><div className="muted">MIT · Copyright © 2026 Dany Kim</div></Field>
+              <Field label="개발자·저작권자"><div>Dany Kim · Copyright © 2026 Dany Kim</div></Field>
+              <Field label="라이선스" hint="1.0.0~1.1.0 은 MIT 로 배포되었습니다">
+                <div>BrightTerm Source-Available License 1.0</div>
+                <div className="muted">개인·회사 업무 사용 무료 · 유료 재배포·유료 번들은 별도 허락 필요</div>
+                <div className="row" style={{ marginTop: 8, gap: 8 }}>
+                  <button className="btn sm" onClick={() => api.app.openLegal('license').catch((e) => st().toast('error', (e as Error).message))}>라이선스 전문</button>
+                  <button className="btn sm" onClick={() => api.app.openLegal('notices').catch((e) => st().toast('error', (e as Error).message))}>제3자 라이선스</button>
+                  <button className="btn sm" onClick={() => api.app.openLegal('chromium').catch((e) => st().toast('error', (e as Error).message))}>Chromium 고지</button>
+                </div>
+              </Field>
               <Field label="데이터 폴더"><div className="code">{info?.dataDir}</div></Field>
               <h3>단축키</h3>
               <div className="shortcut-list" style={{ marginTop: 0 }}>

@@ -20,6 +20,20 @@ asarUnpack:
   - node_modules/cpu-features/**
   - node_modules/node-pty/**
 npmRebuild: false
+# 법적 고지 — 설치된 앱의 resources/legal/ 에 들어가고 설정 → 정보에서 연다
+extraResources:
+  - from: LICENSE
+    to: legal/LICENSE.txt
+  - from: NOTICE
+    to: legal/NOTICE.txt
+  - from: TRADEMARKS.md
+    to: legal/TRADEMARKS.md
+  - from: THIRD_PARTY_NOTICES.txt
+    to: legal/THIRD_PARTY_NOTICES.txt
+  - from: node_modules/electron/dist/LICENSE
+    to: legal/LICENSE.electron.txt
+  - from: node_modules/electron/dist/LICENSES.chromium.html
+    to: legal/LICENSES.chromium.html
 win:
   target:
     - target: nsis

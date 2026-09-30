@@ -1,21 +1,212 @@
-MIT License
+BrightTerm Source-Available License 1.0
 
 Copyright (c) 2026 Dany Kim
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+한국어 정본
+===========
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. 적용 범위
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+이 라이선스는 Dany Kim(이하 “권리자”)이 이 라이선스에 따라
+제공하는 BrightTerm의 저작권 보호 대상 부분(이하 “소프트웨어”)에
+적용됩니다. 복제본 및 수정본에 관한 조건은 소스 코드와 실행 파일,
+그리고 해당 보호 대상 부분을 포함하는 배포물에 적용됩니다.
+
+제3자 구성요소에는 각각의 라이선스가 적용됩니다.
+이미 MIT License로 제공된 BrightTerm 사본에 대한 MIT 이용허락은
+이 라이선스에 의해 취소되거나 제한되지 않습니다.
+
+2. 허용되는 이용
+
+이 라이선스의 조건을 준수하는 모든 사람에게 소프트웨어를
+사용, 실행, 복제, 수정하고 무료로 재배포할 수 있는 전 세계적,
+비독점적, 무상 이용허락을 부여합니다.
+
+개인 사용과 회사·기관의 내부 업무 사용은 허용됩니다.
+소프트웨어를 도구로 사용하여 유료 업무를 수행하는 것도 허용됩니다.
+다만 제3조에서 정한 소프트웨어의 유료 제공은 허용되지 않습니다.
+
+이 라이선스 자체는 수정본의 소스 코드 공개를 요구하지 않습니다.
+
+3. 허용되지 않는 유료 제공
+
+권리자의 별도 서면 허락 없이 다음 행위를 할 수 없습니다.
+
+(a) 소프트웨어의 복제본이나 수정본을 유료로 판매, 임대 또는
+    재배포하는 행위
+(b) 소프트웨어 복제본의 취득 또는 그 복제본을 설치·실행할 권리의
+    부여를 금전이나 그 밖의 대가 지급의 조건으로 하는 행위
+(c) 유료로 제공되는 소프트웨어, 하드웨어, 구독 또는 서비스
+    패키지에 소프트웨어 복제본을 포함하여 제3자에게 제공하는 행위
+
+소프트웨어 항목의 가격을 0원으로 표시하거나 명칭·로고를 바꾸는
+것만으로 위 제한을 피할 수 없습니다.
+
+소프트웨어 복제본의 취득 또는 이용허락과 독립적으로 제공되는
+교육·지원 서비스에 대한 요금은 그 자체로 금지되지 않습니다.
+소프트웨어를 업무 도구로 사용한다는 사정만으로 해당 업무의
+결과물이나 서비스가 유료 번들에 해당하는 것은 아닙니다.
+자발적 후원이나 광고 수입만으로 무료 배포가 유료 제공이 되지는
+않습니다.
+
+4. 재배포 조건
+
+재배포하는 경우 다음을 준수해야 합니다.
+
+(a) 이 라이선스와 적용되는 저작권 고지를 함께 제공할 것
+(b) 제3자 구성요소에 필요한 라이선스와 고지를 보존할 것
+(c) 수정본은 수정되었다는 사실을 표시하고, 권리자가 제작하거나
+    승인한 공식 배포물로 오인시키지 않을 것
+(d) 대화형 그래픽 사용자 인터페이스가 있는 배포본에서는 정보
+    또는 법적 고지 화면을 통해 다음 원저작권 고지를 확인할 수
+    있도록 할 것:
+    “BrightTerm original portions:
+     Copyright (c) 2026 Dany Kim”
+
+수정자가 자신의 수정 부분에 관한 저작권 고지를 추가하는 것은
+허용됩니다.
+
+5. 이름과 로고
+
+이 라이선스는 BrightTerm의 이름이나 로고에 대한 일반적인 상표
+사용권을 부여하지 않습니다. 필요한 저작권 고지, 사실에 부합하는
+출처 설명 및 법률상 허용되는 사용은 배제하지 않습니다.
+공식 배포물과 수정본의 표시에 관한 안내는 TRADEMARKS.md에 있습니다.
+
+6. 별도 허락
+
+권리자는 별도 서면 계약으로 제3조의 행위 등을 허락할 수 있습니다.
+그 허락은 해당 계약의 당사자와 범위에만 적용되며, 다른 사람에게
+이 라이선스를 위반할 권리를 부여하지 않습니다.
+
+7. 위반과 권리 종료
+
+이 라이선스에서 허용하지 않은 유료 제공에는 처음부터 이용허락이
+부여되지 않습니다.
+
+이 라이선스의 조건을 위반하면 이 라이선스에 따른 권리는 자동으로
+종료됩니다. 종료된 권리의 회복에는 권리자의 서면 확인이 필요합니다.
+종료는 이미 발생한 책임을 면제하지 않습니다.
+
+이 조항은 기존 MIT 이용허락, 제3자 라이선스, 법률상 별도로
+인정되는 권리를 종료시키지 않습니다. 배포자의 위반만으로 적법한
+수령인의 독립적인 이용허락이 종료되는 것은 아닙니다.
+
+8. 보증, 책임 및 해석
+
+소프트웨어는 법률상 허용되는 최대 범위에서 어떠한 보증 없이
+“있는 그대로” 제공됩니다. 권리자는 법률상 배제할 수 없는 책임을
+제외하고 소프트웨어의 이용으로 인한 손해에 책임을 지지 않습니다.
+
+이 라이선스는 적용되는 강행규정을 해치지 않는 범위에서 대한민국
+법률에 따라 해석됩니다. 한국어와 영어 문구에 차이가 있으면
+한국어 정본이 우선합니다.
+
+
+English translation
+===================
+
+1. Scope
+
+This license applies to the copyright-protected portions of BrightTerm
+that Dany Kim (the “Licensor”) provides under this license
+(the “Software”). Conditions concerning copies and modified copies
+apply to source and executable forms and to distributions containing
+those protected portions.
+
+Third-party components remain subject to their respective licenses.
+This license does not revoke or restrict MIT permissions for copies
+of BrightTerm previously provided under the MIT License.
+
+2. Permitted activities
+
+Subject to these conditions, everyone is granted a worldwide,
+non-exclusive, royalty-free license to use, run, reproduce, modify,
+and redistribute the Software free of charge.
+
+Personal use and internal use by businesses and organizations are
+permitted. Using the Software as a tool to perform paid work is also
+permitted. Paid provision of the Software described in section 3
+is not permitted.
+
+This license does not itself require disclosure of the source code
+of modified copies.
+
+3. Prohibited paid provision
+
+Without separate written permission from the Licensor, you may not:
+
+(a) sell, rent, or redistribute copies or modified copies of the
+    Software for payment;
+(b) condition receipt of a copy, or permission to install or run
+    that copy, on payment or other consideration; or
+(c) supply copies of the Software to third parties as part of a
+    paid software, hardware, subscription, or service package.
+
+Listing the Software at a separate price of zero, or changing its
+name or logo, does not avoid these restrictions.
+
+Charges for training or support supplied independently of obtaining
+copies or permission to use the Software are not prohibited by
+themselves. Merely using the Software as a work tool does not make
+the resulting work or service a paid bundle. Voluntary donations
+or advertising revenue alone do not turn free distribution into
+paid provision.
+
+4. Redistribution conditions
+
+When redistributing, you must:
+
+(a) provide this license and applicable copyright notices;
+(b) preserve required third-party licenses and notices;
+(c) identify modified copies as modified and not misrepresent
+    them as official distributions made or approved by the Licensor;
+    and
+(d) for distributions with an interactive graphical user interface,
+    make the following original copyright notice accessible through
+    an About or Legal Notices screen:
+    “BrightTerm original portions:
+     Copyright (c) 2026 Dany Kim”
+
+Modifiers may add copyright notices for their own modifications.
+
+5. Names and logos
+
+This license does not grant a general trademark license to the
+BrightTerm name or logos. It does not exclude required copyright
+notices, truthful statements of origin, or uses permitted by law.
+TRADEMARKS.md provides guidance on identifying official and modified
+distributions.
+
+6. Separate permission
+
+The Licensor may authorize activities described in section 3 or
+other activities through a separate written agreement. Such
+permission applies only to the parties and scope of that agreement
+and does not authorize others to violate this license.
+
+7. Violations and termination
+
+No permission is granted in the first place for paid provision
+that this license does not permit.
+
+Your rights under this license terminate automatically if you
+violate its conditions. Reinstatement requires written confirmation
+from the Licensor. Termination does not discharge liability already
+incurred.
+
+This section does not terminate existing MIT permissions,
+third-party licenses, or rights independently recognized by law.
+A distributor's violation alone does not terminate an otherwise
+lawful recipient's independent license.
+
+8. Warranty, liability, and interpretation
+
+To the maximum extent permitted by law, the Software is provided
+“AS IS”, without warranties. Except for liability that cannot
+lawfully be excluded, the Licensor is not liable for damages
+arising from use of the Software.
+
+This license is interpreted under the laws of the Republic of
+Korea without displacing applicable mandatory law. The Korean
+text controls if the Korean and English texts differ.

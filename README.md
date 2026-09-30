@@ -15,10 +15,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.1.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.1.0.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.1.0-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.1.0-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.1.1.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.1.1.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.1.1-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.1.1-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
@@ -131,8 +131,44 @@ APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed  # Develop
 
 개인정보를 수집하지 않습니다 — [개인정보처리방침](./PRIVACY.md)
 
-## 라이선스
+## 이용 조건과 라이선스
 
-[MIT](./LICENSE) — 누구나 자유롭게 쓰고, 고치고, 배포할 수 있습니다.
+BrightTerm은 개인과 회사·기관의 업무에 무료로 사용할 수 있는
+소스 공개형 터미널 앱입니다. 회사 서버 관리 등 업무 목적의
+사용도 허용됩니다.
 
-만든 사람: **Dany Kim**
+v1.1.1부터 BrightTerm 자체 코드에는
+[BrightTerm Source-Available License 1.0](./LICENSE)이 적용됩니다.
+
+- 개인·회사 업무 사용 및 내부 수정: 무료 허용
+- 무료 재배포와 무료 수정본 배포: LICENSE 조건에 따라 허용
+- 수정본·이름을 바꾼 버전을 포함한 유료 재배포: 별도 서면 허락 필요
+- 유료 소프트웨어·하드웨어·서비스 패키지에 포함한 제공:
+  별도 서면 허락 필요
+
+이 라이선스는 판매에 제한이 있으므로 OSI 정의의 오픈소스
+라이선스가 아닙니다. 소스 코드 공개는 계속 유지합니다.
+
+### 기존 MIT 버전
+
+v1.0.0, v1.0.1, v1.1.0은 MIT License로 배포되었습니다.
+해당 배포분에 부여된 MIT 이용허락은 변경되지 않으며,
+v1.1.0이 pre-release라는 점도 이에 영향을 주지 않습니다.
+
+### 저작권과 제3자 구성요소
+
+Copyright (c) 2026 Dany Kim
+
+BrightTerm 자체 코드의 저작권자는 Dany Kim이며, 코드 서명·스토어 게시 주체와
+다를 수 있습니다. 역할 구분은 [NOTICE](./NOTICE)를 참고하세요.
+
+번들한 제3자 구성요소에는 각각의 라이선스가 적용됩니다.
+[THIRD_PARTY_NOTICES.txt](./THIRD_PARTY_NOTICES.txt)를 참고하세요.
+
+이름·로고 사용 안내: [TRADEMARKS.md](./TRADEMARKS.md)
+
+라이선스·유료 재배포 문의: [GitHub 이슈](https://github.com/Yeosup/BrightTerm/issues)
+
+이 절은 요약이며, 정확한 이용조건은 LICENSE에 따릅니다.
+
+앱 안에서는 **설정 → 정보·단축키**(macOS는 메뉴 → BrightTerm 정보)에서 저작권자와 라이선스 전문, 제3자 라이선스를 볼 수 있습니다.

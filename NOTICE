@@ -1,0 +1,24 @@
+BrightTerm
+
+Copyright (c) 2026 Dany Kim
+
+BrightTerm 자체 코드의 저작권자는 Dany Kim입니다.
+제3자 구성요소의 저작권은 각 권리자에게 있습니다.
+
+공식 배포에 사용하는 주체
+- 공식 소스 저장소·릴리스: https://github.com/Yeosup/BrightTerm (저작권자의 허락을 받아 관리)
+- macOS 코드 서명 개발자 계정 명의: WIZBL USA
+- Microsoft Store 게시자: TMI HOLDINGS
+  (게시 준비 중이며, 실제 게시 상태에 맞게 이 문구를 갱신합니다.)
+
+코드 서명 또는 스토어 게시 주체의 표시는 그 자체로
+BrightTerm 자체 코드의 저작권 양도를 의미하지 않습니다.
+
+BrightTerm 자체 코드의 이용조건은 LICENSE에 있습니다.
+제3자 구성요소의 고지와 이용조건은
+THIRD_PARTY_NOTICES.txt 및 관련 동봉 자료에 있습니다.
+
+v1.0.0, v1.0.1, v1.1.0은 MIT License로 배포되었으며,
+해당 배포분에 대한 기존 MIT 이용허락은 유지됩니다.
+
+권리·라이선스 문의: https://github.com/Yeosup/BrightTerm/issues
