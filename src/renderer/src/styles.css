@@ -369,11 +369,18 @@ input, textarea, select, button { font: inherit; color: inherit; }
 .preview-img { max-width: 100%; max-height: 62vh; object-fit: contain; border-radius: 6px; background: repeating-conic-gradient(var(--bg-3) 0% 25%, var(--bg) 0% 50%) 50% / 16px 16px; }
 
 /* ---------- banners (광고) — 작업 영역 밖에만 둔다 ---------- */
-.ad-banner { position: relative; display: block; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; background: #fff; flex-shrink: 0; }
-.ad-banner img { display: block; width: 100%; height: auto; }
-.ad-banner:hover { border-color: var(--accent); }
-.ad-banner:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ad-banner { position: relative; flex-shrink: 0; }
+.ad-frame { position: relative; display: grid; width: 100%; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; background: #fff; }
+/* 배너를 한 칸에 겹쳐 두고 보이는 것만 불투명 — 높이는 이미지가 정한다 */
+.ad-frame img { grid-area: 1 / 1; display: block; width: 100%; height: auto; opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+.ad-frame img.on { opacity: 1; }
+.ad-frame:hover { border-color: var(--accent); }
+.ad-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ad-tag { position: absolute; top: 6px; right: 6px; font-size: 10px; line-height: 1; padding: 3px 5px; border-radius: 4px; background: rgba(15, 17, 21, 0.55); color: #fff; }
+.ad-dots { position: absolute; left: 0; right: 0; bottom: 6px; display: flex; justify-content: center; gap: 5px; pointer-events: none; }
+.ad-dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: rgba(15, 17, 21, 0.22); cursor: pointer; pointer-events: auto; }
+.ad-dots button.on { background: rgba(15, 17, 21, 0.6); }
+@media (prefers-reduced-motion: reduce) { .ad-frame img { transition: none; } }
 .ad-welcome { width: 100%; margin: 20px 0 4px; }
 .ad-sidebar { margin: 8px 10px 10px; }
 

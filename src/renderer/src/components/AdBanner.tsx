@@ -16,31 +16,77 @@ const BUILTIN: Record<BannerSlot, Shown[]> = {
 
 const live = (b: Shown, now: number): boolean => (!b.start || Date.parse(b.start) <= now) && (!b.end || now <= Date.parse(b.end))
 
-function pick(list: Shown[]): Shown | undefined {
-  const total = list.reduce((a, b) => a + (b.weight ?? 1), 0)
+function pick(list: Shown[], skip?: Shown): Shown | undefined {
+  const pool = skip && list.length > 1 ? list.filter((b) => b !== skip) : list
+  const total = pool.reduce((a, b) => a + (b.weight ?? 1), 0)
   let r = Math.random() * total
-  for (const b of list) if ((r -= b.weight ?? 1) < 0) return b
-  return list[0]
+  for (const b of pool) if ((r -= b.weight ?? 1) < 0) return b
+  return pool[0]
+}
+
+/** 배너가 여럿이면 이만큼마다 넘긴다(비중대로 무작위, 같은 배너 연속 없음) */
+const ROTATE_MS = 8000
+
+/** 앱 창이 앞에 있고 보일 때만 true — 뒤에 있거나 최소화면 넘기지 않는다 */
+function useWindowActive(): boolean {
+  const get = (): boolean => document.visibilityState === 'visible' && document.hasFocus()
+  const [active, setActive] = useState(get)
+  useEffect(() => {
+    const on = (): void => setActive(get())
+    window.addEventListener('focus', on)
+    window.addEventListener('blur', on)
+    document.addEventListener('visibilitychange', on)
+    return () => {
+      window.removeEventListener('focus', on)
+      window.removeEventListener('blur', on)
+      document.removeEventListener('visibilitychange', on)
+    }
+  }, [])
+  return active
 }
 
 export function AdBanner({ slot }: { slot: BannerSlot }): JSX.Element | null {
+  const [list, setList] = useState<Shown[]>([])
   const [banner, setBanner] = useState<Shown | undefined>()
+  const [hover, setHover] = useState(false)
+  const active = useWindowActive()
   useEffect(() => {
+    const apply = (next: Shown[]): void => {
+      setList(next)
+      setBanner(pick(next))
+    }
     const load = (): void => {
       api.ads.get().then((all) => {
         const now = Date.now()
         const remote = all.filter((b) => b.slot === slot && live(b, now))
-        setBanner(pick(remote.length ? remote : BUILTIN[slot]))
-      }).catch(() => setBanner(pick(BUILTIN[slot])))
+        apply(remote.length ? remote : BUILTIN[slot])
+      }).catch(() => apply(BUILTIN[slot]))
     }
     load()
     return api.on.ads(load)
   }, [slot])
+  const rotating = list.length > 1 && !hover && active
+  useEffect(() => {
+    if (!rotating) return
+    const t = setTimeout(() => setBanner((cur) => pick(list, cur)), ROTATE_MS)
+    return () => clearTimeout(t)
+  }, [rotating, list, banner])
   if (!banner) return null
   return (
-    <button type="button" className={`ad-banner ad-${slot}`} title={banner.alt} onClick={() => api.app.openBanner(banner.link)}>
-      <img src={banner.image} alt={banner.alt} draggable={false} />
-      <span className="ad-tag">광고</span>
-    </button>
+    <div className={`ad-banner ad-${slot}`} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <button type="button" className="ad-frame" title={banner.alt} onClick={() => api.app.openBanner(banner.link)}>
+        {list.map((b) => (
+          <img key={b.id} src={b.image} alt={b === banner ? b.alt : ''} aria-hidden={b !== banner} className={b === banner ? 'on' : ''} draggable={false} />
+        ))}
+        <span className="ad-tag">광고</span>
+      </button>
+      {list.length > 1 && (
+        <div className="ad-dots">
+          {list.map((b, i) => (
+            <button key={b.id} type="button" className={b === banner ? 'on' : ''} aria-label={`광고 ${i + 1}/${list.length}`} onClick={() => setBanner(b)} />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
