@@ -40,16 +40,39 @@ function secretFor(host: Host): CredentialSecret {
   }
 }
 
+/** 서버 안에 적은 베스천을 접속용 Host 로 — 저장되지 않는 임시 객체 */
+function inlineJumpHost(host: Host): Host {
+  const j = host.jump!
+  return {
+    id: `${host.id}:jump`,
+    groupId: null,
+    alias: `${host.alias} 베스천 (${j.host})`,
+    protocol: 'ssh',
+    host: j.host,
+    port: j.port || 22,
+    username: j.username,
+    authType: j.authType,
+    credentialId: j.credentialId ?? null,
+    tags: [],
+    encoding: 'utf-8',
+    termType: host.termType,
+    keepaliveSec: host.keepaliveSec,
+    forwards: [],
+    sort: 0
+  }
+}
+
 /** Open an authenticated ssh2 Client for the host (recursively via jump host). */
 export async function openClient(host: Host, ctx: SshContext, depth = 0): Promise<{ client: Client; chain: Client[] }> {
   if (depth > 4) throw new Error('점프 호스트 체인이 너무 깁니다')
   const chain: Client[] = []
   let sock: NodeJS.ReadableStream | undefined
-  if (host.jumpHostId) {
-    const jh = store.get().hosts.find((h) => h.id === host.jumpHostId)
-    if (!jh) throw new Error('점프 호스트를 찾을 수 없습니다')
+  const jh = host.jump?.host ? inlineJumpHost(host) : host.jumpHostId ? store.get().hosts.find((h) => h.id === host.jumpHostId) : undefined
+  if (host.jumpHostId && !host.jump?.host && !jh) throw new Error('점프 호스트를 찾을 수 없습니다')
+  if (jh) {
     ctx.onInfo?.(`점프 호스트 ${jh.alias} 경유 중...`)
-    const j = await openClient(jh, { ...ctx, title: jh.alias }, depth + 1)
+    // 베스천에서 입력한 비밀번호를 이 서버 계정에 저장하면 안 된다 — 저장 콜백은 넘기지 않는다
+    const j = await openClient(jh, { ...ctx, title: jh.alias, onSavePassword: undefined }, depth + 1)
     chain.push(...j.chain, j.client)
     sock = await new Promise<ClientChannel>((res, rej) =>
       j.client.forwardOut('127.0.0.1', 0, host.host, host.port, (err, ch) => (err ? rej(err) : res(ch)))

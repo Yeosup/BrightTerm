@@ -3,7 +3,7 @@ import { KeyRound, Lock, Plus, Trash2, RefreshCw, FileKey, FolderOpen } from 'lu
 import { useApp, newHost } from '../state'
 import { api } from '../api'
 import { Modal, Field, Seg, ColorPick, Switch } from './ui'
-import { ENV_COLORS, ENV_LABELS, type Env, type Group, type Host, type SerialOptions } from '@shared/types'
+import { ENV_COLORS, ENV_LABELS, type Env, type Group, type Host, type InlineJump, type SerialOptions } from '@shared/types'
 import { isMac } from '../platform'
 
 const ENVS: Env[] = ['none', 'prod', 'stage', 'dev', 'device']
@@ -32,6 +32,15 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
   const [credMode, setCredMode] = useState<'own' | 'shared'>('own')
   const [ports, setPorts] = useState<{ path: string; label: string }[]>([])
   const [shells, setShells] = useState<{ path: string; label: string }[]>([])
+  // 직접 입력한 베스천의 새 비밀(저장 때 볼트로)
+  const [jKeyText, setJKeyText] = useState('')
+  const [jKeyPath, setJKeyPath] = useState('')
+  const [jPassphrase, setJPassphrase] = useState('')
+  const [jPassword, setJPassword] = useState('')
+  const jumpInline = !!h.jump
+  const jump: InlineJump = h.jump ?? { host: '', port: 22, username: '', authType: 'key', credentialId: null }
+  const setJump = (p: Partial<InlineJump>): void => set('jump', { ...jump, ...p })
+  const jumpCred = creds.find((c) => c.id === h.jump?.credentialId)
   const [err, setErr] = useState('')
   const st = useApp.getState
 
@@ -58,6 +67,11 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
     const out = { ...h, alias: h.alias.trim() || (h.protocol === 'serial' ? h.serial?.path ?? 'Serial' : h.protocol === 'local' ? localName : h.host.trim()), host: h.host.trim(), username: h.username.trim() }
     if (out.protocol === 'local') Object.assign(out, { host: '', port: 0, username: '', authType: 'ask', credentialId: null, jumpHostId: null, forwards: [], encoding: 'utf-8', local: { shell: h.local?.shell?.trim() || undefined, cwd: h.local?.cwd?.trim() || undefined } })
     if (out.protocol !== 'serial' && out.protocol !== 'local' && !out.host) { setTab('basic'); return setErr('호스트 주소를 입력하세요') }
+    if (out.protocol !== 'ssh' || out.jumpHostId) out.jump = null
+    if (out.jump) {
+      out.jump = { ...out.jump, host: out.jump.host.trim(), username: out.jump.username.trim(), port: out.jump.port || 22 }
+      if (!out.jump.host) { setTab('adv'); return setErr('베스천 주소를 입력하세요') }
+    }
     if (out.protocol === 'serial' && !out.serial?.path) { setTab('basic'); return setErr('시리얼 포트를 선택하세요') }
     try {
       const needsSecret = (out.authType === 'password' && password) || (out.authType === 'key' && keyText)
@@ -76,6 +90,23 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
         out.credentialId = meta.id
         await st().refreshCreds()
       }
+      if (out.jump) {
+        const jNeeds = (out.jump.authType === 'key' && jKeyText) || (out.jump.authType === 'password' && jPassword)
+        if (jNeeds) {
+          if (!vault.unlocked) return setErr('볼트가 잠겨 있어 베스천 키를 저장할 수 없습니다')
+          const meta = await api.cred.save({
+            id: out.jump.credentialId && hosts.filter((x) => x.jump?.credentialId === out.jump!.credentialId && x.id !== out.id).length === 0 ? out.jump.credentialId : undefined,
+            name: `${out.alias} 베스천`,
+            kind: out.jump.authType === 'key' ? 'key' : 'password',
+            username: out.jump.username,
+            password: out.jump.authType === 'password' ? jPassword : undefined,
+            privateKey: out.jump.authType === 'key' ? jKeyText : undefined,
+            passphrase: out.jump.authType === 'key' && jPassphrase ? jPassphrase : undefined
+          })
+          out.jump.credentialId = meta.id
+          await st().refreshCreds()
+        }
+      }
       if (out.authType === 'ask' || out.authType === 'agent') {
         // keep credential link only if shared explicitly
         if (credMode === 'own') out.credentialId = out.authType === 'agent' ? out.credentialId : null
@@ -86,6 +117,14 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
     } catch (e) {
       setErr((e as Error).message)
     }
+  }
+
+  const loadJumpKey = async (): Promise<void> => {
+    const r = await api.dialog.readKeyFile()
+    if (!r) return
+    setJKeyText(r.text)
+    setJKeyPath(r.path)
+    if (/PuTTY-User-Key-File-3/.test(r.text)) setErr('PPK v3 키는 PuTTYgen → Conversions → Export OpenSSH key 로 변환해 주세요')
   }
 
   const loadKey = async (): Promise<void> => {
@@ -250,11 +289,57 @@ export function HostEditor({ host: initial, groupId }: { host?: Host; groupId?: 
           <>
             {h.protocol === 'ssh' && (
               <Field label="점프 호스트 (배스천 경유)" hint="이 서버에 접속하기 전에 먼저 거쳐 갈 서버입니다 (ProxyJump).">
-                <select className="select" value={h.jumpHostId ?? ''} onChange={(e) => set('jumpHostId', e.target.value || null)}>
+                <select className="select" value={jumpInline ? '__inline' : h.jumpHostId ?? ''} onChange={(e) => {
+                  const v = e.target.value
+                  if (v === '__inline') setH((x) => ({ ...x, jumpHostId: null, jump: x.jump ?? { host: '', port: 22, username: x.username || '', authType: 'key', credentialId: null } }))
+                  else setH((x) => ({ ...x, jumpHostId: v || null, jump: null }))
+                }}>
                   <option value="">사용 안 함</option>
+                  <option value="__inline">직접 입력 (베스천을 따로 등록하지 않음)</option>
                   {hosts.filter((x) => x.id !== h.id && x.protocol === 'ssh').map((x) => <option key={x.id} value={x.id}>{x.alias} ({x.host})</option>)}
                 </select>
               </Field>
+            )}
+            {h.protocol === 'ssh' && jumpInline && (
+              <div className="jump-inline">
+                <div className="grid3">
+                  <Field label="베스천 주소">
+                    <input className="input mono" autoFocus={!jump.host} value={jump.host} onChange={(e) => {
+                      const v = e.target.value
+                      const m = v.match(/^([^@\s]+)@([^:\s]+)(?::(\d+))?$/)
+                      if (m) setJump({ username: m[1], host: m[2], ...(m[3] ? { port: +m[3] } : {}) }); else setJump({ host: v })
+                    }} placeholder="3.37.115.13  또는  ubuntu@host" />
+                  </Field>
+                  <Field label="포트"><input className="input mono" type="number" value={jump.port} onChange={(e) => setJump({ port: +e.target.value || 22 })} /></Field>
+                  <Field label="사용자 이름"><input className="input mono" value={jump.username} onChange={(e) => setJump({ username: e.target.value })} placeholder="ubuntu" /></Field>
+                </div>
+                <Field label="베스천 인증">
+                  <Seg value={jump.authType} onChange={(v) => setJump({ authType: v })} options={[
+                    { value: 'key', label: <><KeyRound size={13} />개인 키</> },
+                    { value: 'password', label: '비밀번호' },
+                    { value: 'agent', label: 'SSH 에이전트' },
+                    { value: 'ask', label: '매번 묻기' }
+                  ]} />
+                </Field>
+                {jump.authType === 'key' && (
+                  <div className="grid2">
+                    <Field label="베스천 개인 키" hint={isMac ? '~/.ssh 는 숨김 폴더입니다 — 파일 창에서 ⇧⌘G 로 경로를 입력하세요' : undefined}>
+                      <div className="row">
+                        <button className="btn" onClick={loadJumpKey}><FileKey size={14} />키 파일 불러오기</button>
+                        <span className="muted grow" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{jKeyPath.split(/[\\/]/).pop() || (jumpCred?.kind === 'key' ? '저장된 키 사용 중' : '선택된 키 없음')}</span>
+                      </div>
+                    </Field>
+                    <Field label="키 암호 (있는 경우)"><input className="input" type="password" value={jPassphrase} onChange={(e) => setJPassphrase(e.target.value)} autoComplete="new-password" /></Field>
+                  </div>
+                )}
+                {jump.authType === 'password' && (
+                  <Field label="베스천 비밀번호" hint={jumpCred ? '저장된 비밀번호가 있습니다. 바꾸려면 새로 입력하세요.' : undefined}>
+                    <input className="input" type="password" value={jPassword} onChange={(e) => setJPassword(e.target.value)} placeholder={jumpCred ? '••••••••  (저장됨)' : '비밀번호'} autoComplete="new-password" />
+                  </Field>
+                )}
+                {!vault.unlocked && (jump.authType === 'key' || jump.authType === 'password') && <div className="notice warn"><Lock size={15} />볼트가 잠겨 있어 베스천 키·비밀번호를 저장할 수 없습니다.</div>}
+                <div className="muted" style={{ fontSize: 12 }}>이 서버에 접속할 때 위 베스천을 먼저 거칩니다. 베스천은 서버 목록에 따로 생기지 않습니다.</div>
+              </div>
             )}
             <Field label={h.protocol === 'local' ? '셸 시작 후 자동 실행 명령' : '접속 후 자동 실행 명령'} hint={h.protocol === 'local' ? '예: nvm use && claude' : '예: cd /var/www && sudo -i'}>
               <input className="input mono" value={h.startupCommand ?? ''} onChange={(e) => set('startupCommand', e.target.value)} />

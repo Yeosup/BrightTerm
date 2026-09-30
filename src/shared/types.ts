@@ -34,6 +34,15 @@ export interface SerialOptions {
   localEcho: boolean
 }
 
+/** 서버 설정 안에 직접 적은 점프 호스트(베스천) — 따로 등록하지 않고 쓴다. 비밀은 볼트(credentialId) */
+export interface InlineJump {
+  host: string
+  port: number
+  username: string
+  authType: AuthType
+  credentialId?: string | null
+}
+
 /** 로컬 터미널 — 이 PC 의 셸. 빈 값이면 기본 셸 / 홈 폴더 */
 export interface LocalOptions {
   shell?: string
@@ -51,6 +60,8 @@ export interface Host {
   authType: AuthType
   credentialId?: string | null
   jumpHostId?: string | null
+  /** jumpHostId 대신 이 서버 안에 직접 적은 베스천 */
+  jump?: InlineJump | null
   color?: string
   env?: Env
   tags: string[]

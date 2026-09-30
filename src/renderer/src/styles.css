@@ -376,3 +376,6 @@ input, textarea, select, button { font: inherit; color: inherit; }
 .ad-tag { position: absolute; top: 6px; right: 6px; font-size: 10px; line-height: 1; padding: 3px 5px; border-radius: 4px; background: rgba(15, 17, 21, 0.55); color: #fff; }
 .ad-welcome { width: 100%; margin: 20px 0 4px; }
 .ad-sidebar { margin: 8px 10px 10px; }
+
+/* 서버 편집 — 직접 입력한 베스천 */
+.jump-inline { display: flex; flex-direction: column; gap: 10px; margin: -4px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
