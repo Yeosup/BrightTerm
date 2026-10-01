@@ -80,13 +80,6 @@ export function AdBanner({ slot }: { slot: BannerSlot }): JSX.Element | null {
         ))}
         <span className="ad-tag">광고</span>
       </button>
-      {list.length > 1 && (
-        <div className="ad-dots">
-          {list.map((b, i) => (
-            <button key={b.id} type="button" className={b === banner ? 'on' : ''} aria-label={`광고 ${i + 1}/${list.length}`} onClick={() => setBanner(b)} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
