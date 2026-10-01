@@ -13,6 +13,7 @@ import { hasTmux, listShells } from './transports/local'
 import { initialBounds, resetWindow, trackWindow } from './windowState'
 import { scanAws } from './aws'
 import { cachedBanners, refreshBanners } from './ads'
+import { checkUpdate, startUpdateCheck, updateInfo } from './update'
 import type { AdhocTarget, CredentialInput, Group, Host, ImportCandidate, StoreData } from '@shared/types'
 
 let win: BrowserWindow | null = null
@@ -230,6 +231,8 @@ function registerIpc(): void {
   })
   handle('app:openExternal', (url: string) => { if (/^https?:\/\//.test(url)) shell.openExternal(url) })
   handle('ads:get', () => cachedBanners())
+  handle('update:get', () => updateInfo())
+  handle('update:check', () => checkUpdate())
   handle('app:openBanner', (url: string) => { if (/^https:\/\//.test(url)) shell.openExternal(url) })
   handle('app:toggleFullScreen', () => win?.setFullScreen(!win.isFullScreen()))
   handle('app:resetWindow', () => { if (win) resetWindow(win) })
@@ -420,6 +423,7 @@ app.whenReady().then(() => {
   createWindow()
   startAutoLock()
   setTimeout(() => void refreshBanners(), 3000)
+  startUpdateCheck()
 })
 
 app.on('before-quit', () => {

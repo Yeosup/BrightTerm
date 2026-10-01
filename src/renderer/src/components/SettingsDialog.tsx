@@ -14,6 +14,7 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
   const { settings, vault, creds, hosts } = useApp()
   const [sec, setSec] = useState<Sec>((section as Sec) ?? 'look')
   const [info, setInfo] = useState<{ version: string; dataDir: string } | null>(null)
+  const [checking, setChecking] = useState(false)
   const [pw, setPw] = useState({ old: '', a: '', b: '', msg: '' })
   const st = useApp.getState
   const set = st().setSettings
@@ -194,6 +195,24 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
                   <div className="muted">SSH · Telnet · Serial · 로컬 터미널 — 밝은터</div>
                 </div>
               </div>
+              <div className="card">
+                <Toggle label="새 버전 알림" desc="새 버전이 나오면 아래 상태 표시줄에 알려 줍니다. 시작할 때와 12시간마다 GitHub 릴리스를 확인하며, 어떤 정보도 보내지 않습니다. 설치는 직접 내려받아 합니다" value={settings.checkUpdates} onChange={(v) => set({ checkUpdates: v })} />
+              </div>
+              <button
+                className="btn sm"
+                style={{ alignSelf: 'flex-start' }}
+                disabled={checking}
+                onClick={async () => {
+                  setChecking(true)
+                  const r = await api.update.check().catch(() => ({ ok: false, latest: null }))
+                  setChecking(false)
+                  if (r.latest) {
+                    st().toast('info', `새 버전 ${r.latest.version}이 나왔습니다 — 릴리스 페이지를 엽니다`)
+                    void api.app.openExternal(r.latest.url)
+                  } else if (r.ok) st().toast('ok', `최신 버전입니다 (${info?.version ?? ''})`)
+                  else st().toast('error', '확인하지 못했습니다 — 인터넷 연결을 확인하세요')
+                }}
+              >{checking ? '확인 중…' : '지금 확인'}</button>
               <Field label="개발자·저작권자"><div>Dany Kim · Copyright © 2026 Dany Kim</div></Field>
               <Field label="라이선스" hint="1.0.0~1.1.0 은 MIT 로 배포되었습니다">
                 <div>BrightTerm Source-Available License 1.0</div>

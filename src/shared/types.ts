@@ -124,7 +124,12 @@ export interface Settings {
   restoreTabs: boolean
   /** 창 크기·위치 기억 */
   rememberWindow: boolean
+  /** 새 버전이 나오면 상태 표시줄에 알림 (GitHub 릴리스 확인) */
+  checkUpdates: boolean
 }
+
+/** 지금 쓰는 것보다 새 버전 — url 은 GitHub 릴리스 페이지 */
+export interface UpdateInfo { version: string; url: string }
 
 /** 앱을 다시 켤 때 복원할 탭·분할 — 창마다 서버 id 또는 로컬 시작 폴더만 기억한다 */
 export type SavedPane = { hostId: string } | { local: { cwd?: string } }
@@ -275,7 +280,8 @@ export const DEFAULT_SETTINGS: Settings = {
   sidebarWidth: 260,
   rightPanelWidth: 340,
   restoreTabs: true,
-  rememberWindow: true
+  rememberWindow: true,
+  checkUpdates: true
 }
 
 export const ENV_COLORS: Record<Env, string> = {

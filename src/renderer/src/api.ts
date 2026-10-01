@@ -1,5 +1,5 @@
 import type {
-  AdhocTarget, Banner, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, Transfer, UiRequest, VaultStatus
+  AdhocTarget, Banner, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, Transfer, UiRequest, UpdateInfo, VaultStatus
 } from '@shared/types'
 
 interface Bt {
@@ -33,7 +33,8 @@ export const api = {
     storeChanged: (cb: () => void) => bt.on('store:changed', cb as never),
     toast: (cb: (t: { kind: 'ok' | 'error' | 'info'; text: string }) => void) => bt.on('toast', cb as never),
     menu: (cb: (action: string) => void) => bt.on('menu:action', cb as never),
-    ads: (cb: () => void) => bt.on('ads:changed', cb as never)
+    ads: (cb: () => void) => bt.on('ads:changed', cb as never),
+    update: (cb: (u: UpdateInfo | null) => void) => bt.on('update:changed', cb as never)
   },
   store: {
     get: () => bt.call<StoreData>('store:get'),
@@ -113,5 +114,9 @@ export const api = {
   },
   ads: {
     get: () => bt.call<(Omit<Banner, 'image'> & { image: string })[]>('ads:get')
+  },
+  update: {
+    get: () => bt.call<UpdateInfo | null>('update:get'),
+    check: () => bt.call<{ ok: boolean; latest: UpdateInfo | null }>('update:check')
   }
 }

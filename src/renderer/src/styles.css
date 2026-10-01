@@ -287,6 +287,10 @@ input, textarea, select, button { font: inherit; color: inherit; }
 .statusbar .sb-fill { flex: 1; }
 .statusbar .sb-btn { cursor: pointer; border-radius: 4px; padding: 2px 6px; }
 .statusbar .sb-btn:hover { background: var(--bg-hover); color: var(--text); }
+.statusbar .sb-update { gap: 0; color: var(--accent); font-weight: 600; }
+.statusbar .sb-update .sb-btn { display: flex; align-items: center; gap: 5px; }
+.statusbar .sb-update .sb-btn:hover { color: var(--accent); }
+.statusbar .sb-update .sb-x { padding: 2px 4px; font-weight: 400; }
 .statusbar .bc { color: #fff; background: var(--warn); padding: 1px 8px; border-radius: 4px; font-weight: 700; }
 
 /* ---------- modal ---------- */
