@@ -204,7 +204,8 @@ export async function openClient(host: Host, ctx: SshContext, depth = 0): Promis
   const client = new Client()
   await new Promise<void>((resolve, reject) => {
     client.once('ready', () => resolve())
-    client.once('error', (e) => reject(e))
+    // 접속 중 오류는 두 번 올 수 있다(타임아웃·소켓 오류 → 닫힐 때 'Connection lost before handshake') — once 면 두 번째가 메인 프로세스 예외 창
+    client.on('error', (e) => reject(e))
     client.connect(cfg)
   })
   client.on('error', () => { /* handled by close */ })
