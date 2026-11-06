@@ -15,10 +15,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.2.3.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.2.3.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.2.3-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.2.3-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.3.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.3.0.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.3.0-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.3.0-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
@@ -41,6 +41,7 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 | ID/PW 저장 | 서버 편집 → 인증 탭에서 입력합니다. 또는 접속할 때 묻는 창에서 "저장"을 체크하세요. 여러 서버가 한 계정을 쓰면 "공유 계정"으로 묶을 수 있습니다. |
 | 창 구분 | 서버·폴더마다 환경(운영/스테이징/개발/장비)과 색을 지정합니다. 탭, 패널 머리글, 트리, 워터마크가 그 색을 따르고, 선택된 패널은 머리글 아래 색 선으로 표시됩니다(운영 서버는 빨강). |
 | 화면 분할 | 같은 서버를 오른쪽/아래로 나눠 엽니다. 폴더를 우클릭한 뒤 "폴더 전체를 그리드로 열기"를 누르면 폴더의 서버가 한 화면 격자로 열립니다. 사이드바에서 이미 열린 서버를 클릭하면 그 탭·패널로 이동하고(여러 개면 누를 때마다 다음 것), 패널을 옮기면 사이드바 선택도 따라갑니다. 새로 하나 더 열려면 항목에 마우스를 올려 ▶. |
+| 칸 옮기기·빈 칸 (1.3.0) | 분할 중 창을 닫으면 그 자리가 **빈 칸**으로 남습니다. 사이드바에서 서버를 빈 칸으로 끌어다 놓거나, 빈 칸을 선택한 채 서버를 더블클릭하면 그 자리에 열립니다(빈 칸을 또 닫으면 칸이 없어집니다). 칸 머리글을 끌어 다른 칸 **가운데**에 놓으면 자리를 맞바꾸고, **가장자리**에 놓으면 그쪽으로 옮깁니다. 서버를 칸 가장자리에 끌어 놓으면 그쪽으로 나눠 엽니다. 서버를 우클릭 → **위치 골라서 연결…** 을 누르면 열린 탭마다 배치가 그려지고, 칸의 화살표나 빈 칸을 눌러 열 자리를 고릅니다. |
 | 빠른 접속 | 서버 이름이나 IP를 검색하거나 `user@host:port`를 바로 입력합니다. `>`로 시작하면 명령을 실행합니다. |
 | 이미지 전송 (Claude Code 등) | SSH 터미널에서 캡처를 붙여넣으면 서버 `~/.brightterm/uploads/`에 PNG로 올라가고 그 경로가 입력됩니다. 파일을 터미널에 끌어다 놓아도 같습니다. |
 | SFTP | 같은 연결로 파일 패널이 열립니다(재로그인 없음). 끌어다 놓아 업로드하고, 우클릭으로 다운로드·삭제·권한·이름 변경을 합니다. 이미지 미리보기와 "로컬 앱으로 편집"(저장하면 자동 업로드)도 있습니다. |
@@ -51,7 +52,9 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 | 창 크기 기억 | 다시 켜면 마지막 창 크기·위치(최대화 포함)로 엽니다. 모니터가 바뀌어 화면 밖이면 가운데로. 설정 → 모양에서 끄거나 **원래 크기로** 되돌릴 수 있습니다. |
 | 자동 재접속 | 연결이 끊기면 2·4·8…초 간격으로 다시 연결합니다. 끊긴 창에서 Enter를 누르면 바로 재접속합니다. |
 | 시리얼 (RS-485/USB) | 프로토콜에서 "시리얼"을 고릅니다. Windows는 `COM3`, macOS는 `/dev/cu.usbserial-…` 형식입니다. baud, 패리티, 흐름 제어, Enter 전송값(CR/LF/CRLF), 로컬 에코를 설정할 수 있습니다. |
-| 잠금 해제 | 마스터 비밀번호 대신 **Windows 계정** 또는 **macOS Touch ID(키체인)**으로 열 수 있습니다(설정 → 보안). |
+| 잠금 해제 | 마스터 비밀번호 대신 **Windows 계정** 또는 **macOS Touch ID(키체인)**으로 열 수 있습니다(설정 → 보안). 리눅스용 GNOME 키링·KDE 지갑 지원 코드도 들어 있습니다(리눅스 설치본은 아직 없음). |
+| git 동기화 (1.3.0) | 설정 → 동기화 (git)에 **비공개** 저장소 주소를 넣으면 서버 목록·폴더·스니펫·저장된 계정을 여러 PC에 맞춥니다. 저장소에는 볼트 키로 암호화한 파일 하나(`brightterm-sync.json`)만 올라가 주소·계정명도 평문으로 남지 않고, 다른 PC는 **같은 마스터 비밀번호**로 엽니다. 한쪽에서 지운 서버는 다른 PC에서도 지워지고, 양쪽에서 같은 서버를 고쳤으면 동기화하는 PC 쪽이 남습니다. 인증은 그 PC의 git(SSH 키·자격 증명 도우미)을 그대로 씁니다. 새 PC에서는 "저장소 볼트 받기"를 고르세요. |
+| Shift+Enter · 원격 복사 (1.3.0) | Shift+Enter는 명령을 실행하지 않고 줄만 바꿉니다(Claude Code 여러 줄 입력, ⌥Enter와 같은 신호). tmux 마우스 선택·원격 vim·Claude Code가 보내는 복사(OSC 52)는 이 PC 클립보드로 들어옵니다(원격이 클립보드를 읽는 요청은 거절). 둘 다 설정 → 입력에서 끌 수 있습니다. |
 | 기타 | EUC-KR(CP949) 장비, 스니펫, 세션 로그, 자동 잠금, 백업 내보내기/가져오기 |
 
 ## Claude Code 창 띄워 두기 (세션 유지)
@@ -124,34 +127,7 @@ Windows에서 `vim` 등에 Ctrl+V를 보내야 한다면 설정 → 입력에서
 - 볼트 파일: Windows `%APPDATA%\BrightTerm\data\vault.json`, macOS `~/Library/Application Support/BrightTerm/data/vault.json`. 서버 목록은 같은 폴더의 `store.json`에 있습니다.
 - 처음 접속하는 서버는 호스트 키 지문을 보여 주고 승인을 받습니다. 키가 바뀌면 빨간 경고와 함께 접속을 막습니다.
 - 복호화된 비밀번호는 화면(렌더러) 쪽으로 넘어가지 않습니다. 렌더러는 Node 접근이 없고 context isolation이 켜져 있습니다.
-- 앱이 스스로 보내는 네트워크 요청은 **배너 목록 가져오기**와 **새 버전 확인**(GitHub 릴리스, 시작할 때와 12시간마다) 두 가지뿐이며, 서버 목록·IP·계정 등 어떤 정보도 담지 않습니다. 새 버전 확인은 설정 → 정보에서 끌 수 있습니다.
-
-## 배너
-
-환영 화면과 서버 목록 아래에 배너가 하나씩 표시됩니다(`광고` 표시). 터미널 작업 영역에는 넣지 않습니다. 한 칸에 배너가 여럿이면 8초마다 바뀌고, 마우스를 올려 두거나 창이 뒤에 있으면 멈춥니다(1.2.2부터).
-
-- 앱에 기본 배너가 들어 있어 오프라인·사내망에서도 그대로 보입니다.
-- 원격 목록은 모두의 앱(`https://moduapp.kr/api/banners/brightterm`)에서 받습니다. 관리 화면에서 바꾸면 앱을 다시 배포하지 않아도 배너가 바뀝니다(1.0.0 은 이 저장소의 [`banners/feed.json`](./banners/feed.json)을 읽습니다). 앱은 시작할 때 한 번 받아 캐시합니다(다른 주소를 쓰려면 `BRIGHTTERM_BANNER_FEED` 환경 변수, 빈 값이면 끔). 실패하면 캐시 → 기본 배너 순으로 조용히 넘어갑니다.
-- 목록 형식:
-
-```json
-{
-  "banners": [
-    {
-      "id": "moduapp-2026q4",
-      "slot": "welcome",
-      "image": "https://example.com/banner-wide.png",
-      "link": "https://moduapp.kr/?utm_source=brightterm&utm_medium=app_banner",
-      "alt": "모두의 앱",
-      "weight": 1,
-      "start": "2026-10-01",
-      "end": "2026-12-31"
-    }
-  ]
-}
-```
-
-- `slot`: `welcome`(권장 1280×320) 또는 `sidebar`(권장 720×240). 이미지는 png/jpeg/webp/gif, 768KB 이하, **https만**. 링크도 https만 받고 외부 브라우저로 엽니다. HTML·스크립트는 받지 않습니다.
+- 앱이 스스로 보내는 네트워크 요청은 **새 버전 확인**(GitHub 릴리스, 시작할 때와 12시간마다) 하나뿐이며, 서버 목록·IP·계정 등 어떤 정보도 담지 않습니다. 설정 → 정보에서 끌 수 있습니다. git 동기화를 켜면 사용자가 지정한 저장소로 암호화된 동기화 파일을 주고받습니다. 1.3.0부터 광고 배너는 없습니다(1.2.x 까지는 시작할 때 모두의 앱에서 배너 목록을 받았습니다).
 
 ## 개발
 
@@ -165,7 +141,7 @@ npm run dist:mac     # macOS dmg x64 + arm64 (dist/) — ad-hoc 서명(인증서
 APPLE_KEYCHAIN_PROFILE=<notarytool 프로필> npm run dist:mac:signed  # Developer ID 서명 + 공증 (electron-builder.signed.yml)
 ```
 
-- 구조: `src/main`(Electron 메인: SSH/시리얼/텔넷, 볼트, SFTP, 가져오기, AWS, 배너), `src/preload`, `src/renderer`(React + xterm.js UI, 키 판정은 `platform.ts`), `src/shared`(공용 타입).
+- 구조: `src/main`(Electron 메인: SSH/시리얼/텔넷, 볼트, SFTP, 가져오기, AWS, git 동기화), `src/preload`, `src/renderer`(React + xterm.js UI, 키 판정은 `platform.ts`), `src/shared`(공용 타입).
 - 테스트: `test/e2e.mjs`(Linux sshd 시나리오), `test/e2e-mac.mjs`(macOS 키 모델·붙여넣기·이미지 업로드 — 파일 머리 주석 참고), `test/importers.test.mjs`(가져오기 파서).
 - 요구 사항: Node 20+, Electron 43.
 
