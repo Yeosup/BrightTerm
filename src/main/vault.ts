@@ -74,13 +74,32 @@ class Vault {
     this.v = readJson<VaultFile>(this.file)
   }
 
+  /** 리눅스에서 Electron 이 고른 키링. basic_text(평문 대체)·unknown 은 '없음'으로 본다 */
+  private linuxBackend(): string | undefined {
+    if (process.platform !== 'linux') return undefined
+    try {
+      return safeStorage.getSelectedStorageBackend()
+    } catch {
+      return 'unknown'
+    }
+  }
+
+  private osAvailable(): boolean {
+    if (!safeStorage.isEncryptionAvailable()) return false
+    const b = this.linuxBackend()
+    return !b || (b !== 'basic_text' && b !== 'unknown')
+  }
+
   status(): VaultStatus {
+    const b = this.linuxBackend()
     return {
       initialized: !!this.v,
       unlocked: !!this.key,
-      osUnlockAvailable: safeStorage.isEncryptionAvailable(),
+      osUnlockAvailable: this.osAvailable(),
       osUnlockEnabled: !!this.v?.osWrapped,
-      osUnlockKind: process.platform === 'darwin' ? (systemPreferences.canPromptTouchID() ? 'touchid' : 'keychain') : 'windows'
+      osUnlockKind: process.platform === 'darwin' ? (systemPreferences.canPromptTouchID() ? 'touchid' : 'keychain')
+        : process.platform === 'linux' ? (b?.startsWith('kwallet') ? 'kwallet' : 'gnome') : 'windows',
+      linuxBackend: b
     }
   }
 
@@ -124,7 +143,7 @@ class Vault {
   }
 
   async tryOsUnlock(win?: BrowserWindow | null): Promise<boolean> {
-    if (!this.v?.osWrapped || !safeStorage.isEncryptionAvailable()) return false
+    if (!this.v?.osWrapped || !this.osAvailable()) return false
     if (process.platform === 'darwin' && systemPreferences.canPromptTouchID()) {
       try {
         if (win && !win.isFocused()) win.focus()
@@ -149,7 +168,7 @@ class Vault {
   setOsUnlock(enabled: boolean): void {
     this.requireKey()
     if (!this.v) return
-    if (enabled && safeStorage.isEncryptionAvailable()) {
+    if (enabled && this.osAvailable()) {
       this.v.osWrapped = safeStorage.encryptString(this.key!.toString('hex')).toString('base64')
     } else {
       delete this.v.osWrapped

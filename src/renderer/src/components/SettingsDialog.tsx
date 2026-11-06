@@ -137,6 +137,12 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
                     onChange={async (v) => { try { await api.vault.setOsUnlock(v); useApp.setState({ vault: await api.vault.status() }) } catch (e) { st().toast('error', (e as Error).message) } }} />
                 </div>
               )}
+              {api.platform === 'linux' && (
+                <Field label="리눅스 키링" hint={`볼트 OS 잠금해제에 쓸 키링. 자동이면 데스크톱에 맞춰 고릅니다(지금: ${vault.linuxBackend ?? '알 수 없음'}${vault.osUnlockAvailable ? '' : ' — 쓸 수 있는 키링이 없어 OS 잠금해제가 꺼져 있습니다'}). 바꾸면 앱을 다시 시작해야 적용됩니다`}>
+                  <Seg value={settings.linuxKeyring} onChange={(v) => { set({ linuxKeyring: v }); st().toast('info', '앱을 다시 시작하면 적용됩니다') }}
+                    options={[{ value: 'auto', label: '자동' }, { value: 'gnome-libsecret', label: 'GNOME 키링' }, { value: 'kwallet5', label: 'KWallet 5' }, { value: 'kwallet6', label: 'KWallet 6' }]} />
+                </Field>
+              )}
               <h3>마스터 비밀번호 변경</h3>
               <div className="grid3">
                 <input className="input" type="password" placeholder="현재 비밀번호" value={pw.old} onChange={(e) => setPw({ ...pw, old: e.target.value })} />

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, shell, powerMonitor, clipboard, Me
 import { join } from 'path'
 import { promises as fs } from 'fs'
 import { randomUUID } from 'crypto'
-import { store, dataDir } from './store'
+import { store, dataDir, readJson } from './store'
 import { vault, VaultFile } from './vault'
 import { sessions } from './sessions'
 import * as sftp from './sftp'
@@ -21,6 +21,12 @@ let win: BrowserWindow | null = null
 
 // 테스트·개발: 데이터 폴더를 따로 주면 Chromium 프로필도 분리해 실행 중인 앱과 별개 인스턴스로 뜬다
 if (process.env.BRIGHTTERM_DATA) app.setPath('userData', join(process.env.BRIGHTTERM_DATA, 'userdata'))
+
+// 리눅스: 볼트 OS 잠금해제가 쓸 키링. auto 면 Electron 이 데스크톱에 맞춰(GNOME=libsecret, KDE=kwallet) 고른다 — ready 전에만 바꿀 수 있다
+if (process.platform === 'linux') {
+  const k = readJson<StoreData>(join(dataDir(), 'store.json'))?.settings?.linuxKeyring
+  if (k && k !== 'auto') app.commandLine.appendSwitch('password-store', k)
+}
 
 // Single instance – second launch focuses the existing window
 if (!app.requestSingleInstanceLock()) {

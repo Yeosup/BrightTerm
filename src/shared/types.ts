@@ -108,6 +108,8 @@ export interface Settings {
   copyOnSelect: boolean
   /** 원격 프로그램(tmux·vim·Claude Code)이 OSC 52 로 보낸 복사 내용을 이 PC 클립보드에 넣기 */
   osc52Clipboard: boolean
+  /** 리눅스 키링 — auto 면 데스크톱(GNOME/KDE)에 맞춰 Electron 이 고른다. 바꾸면 다시 시작해야 적용 */
+  linuxKeyring: 'auto' | 'gnome-libsecret' | 'kwallet5' | 'kwallet6'
   /** 접속 정보·볼트를 git 저장소로 동기화(저장소엔 볼트 키로 암호화한 파일 하나) */
   sync: SyncSettings
   /** 분할 중 창을 닫으면 그 자리를 빈 칸으로 남기기(빈 칸을 다시 닫으면 칸 제거) */
@@ -201,7 +203,9 @@ export interface VaultStatus {
   unlocked: boolean
   osUnlockAvailable: boolean
   osUnlockEnabled: boolean
-  osUnlockKind?: 'windows' | 'touchid' | 'keychain'
+  osUnlockKind?: 'windows' | 'touchid' | 'keychain' | 'gnome' | 'kwallet'
+  /** 리눅스: Electron 이 고른 키링(gnome_libsecret·kwallet5…). basic_text 면 OS 잠금해제를 쓰지 않는다 */
+  linuxBackend?: string
 }
 
 export type SessionState = 'connecting' | 'connected' | 'reconnecting' | 'closed' | 'error'
@@ -295,6 +299,7 @@ export const DEFAULT_SETTINGS: Settings = {
   shiftEnterNewline: true,
   keepEmptySlot: true,
   sync: { remote: '', branch: 'main', auto: true },
+  linuxKeyring: 'auto',
   rightClickPaste: true,
   ctrlVPaste: true,
   confirmMultilinePaste: true,
