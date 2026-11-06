@@ -99,6 +99,19 @@ export function ensureEntry(sessionId: string): TermEntry {
     if (useApp.getState().settings.bell) new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=').play().catch(() => {})
   })
   term.attachCustomKeyEventHandler((ev) => keyHandler(entry, ev))
+  // OSC 52 — tmux(set-clipboard)·vim·Claude Code 가 원격에서 '복사'하면 이 PC 클립보드로. 읽기('?')는 거절(원격이 클립보드를 엿보지 못하게)
+  term.parser.registerOscHandler(52, (data) => {
+    if (!useApp.getState().settings.osc52Clipboard) return true
+    const i = data.indexOf(';')
+    const b64 = i >= 0 ? data.slice(i + 1) : ''
+    if (!b64 || b64 === '?' || b64.length > 4_000_000) return true
+    try {
+      const bin = atob(b64)
+      const text = new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)))
+      if (text) api.clip.writeText(text)
+    } catch { /* 잘못된 base64 */ }
+    return true
+  })
   if (isMac) {
     // ⌘V arrives as a native menu paste: route it through smartPaste (image/file upload, multi-line guard)
     el.addEventListener('paste', (ev) => {
@@ -257,8 +270,21 @@ function macKeyHandler(e: TermEntry, ev: KeyboardEvent): boolean {
   return false
 }
 
+/** Shift+Enter → ESC+CR(⌥Enter 와 같음). Claude Code 등은 입력 중 새 줄로, 셸은 대개 무시한다. */
+function shiftEnter(e: TermEntry, ev: KeyboardEvent): boolean {
+  if (ev.key !== 'Enter' || !ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey || ev.isComposing) return false
+  if (!useApp.getState().settings.shiftEnterNewline) return false
+  ev.preventDefault()
+  handleInput(e, '\x1b\r')
+  return true
+}
+
 function keyHandler(e: TermEntry, ev: KeyboardEvent): boolean {
-  if (ev.type !== 'keydown') return true
+  if (ev.type !== 'keydown') {
+    // keydown 에서 처리한 Shift+Enter 의 keypress 가 Enter 로 한 번 더 나가지 않게
+    return !(ev.key === 'Enter' && ev.shiftKey && !ev.ctrlKey && !ev.altKey && !ev.metaKey && useApp.getState().settings.shiftEnterNewline)
+  }
+  if (shiftEnter(e, ev)) return false
   if (isMac) return macKeyHandler(e, ev)
   const st = useApp.getState()
   const k = ev.key.toLowerCase()

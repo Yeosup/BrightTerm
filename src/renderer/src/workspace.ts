@@ -1,5 +1,5 @@
 import type { LayoutNode, PaneNode } from './layout'
-import { panes, uid } from './layout'
+import { panes, uid, isEmptyPane } from './layout'
 import { api } from './api'
 import { useApp, type Tab } from './state'
 import type { SavedLayout, SavedPane, SavedTab, SavedWorkspace, SessionInfo } from '@shared/types'
@@ -18,6 +18,7 @@ function paneSpec(info: SessionInfo | undefined): SavedPane | null {
 
 function toSaved(n: LayoutNode, sessions: Record<string, SessionInfo>): SavedLayout | null {
   if (n.type === 'pane') {
+    if (isEmptyPane(n)) return { type: 'pane', pane: { empty: true } } // 빈 칸도 자리째 기억
     const p = paneSpec(sessions[n.sessionId])
     return p ? { type: 'pane', pane: p } : null
   }
@@ -34,8 +35,8 @@ export function snapshot(): SavedWorkspace {
   let active = 0
   for (const t of s.tabs) {
     const root = toSaved(t.root, s.sessions)
-    if (!root) continue
-    const ids = panes(t.root).filter((p) => paneSpec(s.sessions[p.sessionId])).map((p) => p.id)
+    if (!root || panes(t.root).every((p) => isEmptyPane(p) || !paneSpec(s.sessions[p.sessionId]))) continue
+    const ids = panes(t.root).filter((p) => isEmptyPane(p) || paneSpec(s.sessions[p.sessionId])).map((p) => p.id)
     if (t.id === s.activeTab) active = tabs.length
     tabs.push({ title: t.title, root, focused: Math.max(0, ids.indexOf(t.focused)), zoomed: t.zoomed ? ids.indexOf(t.zoomed) : null })
   }
@@ -72,6 +73,11 @@ async function build(n: SavedLayout, out: PaneNode[]): Promise<LayoutNode | null
   if (n.type === 'pane') {
     const st = useApp.getState()
     const p = n.pane
+    if ('empty' in p) {
+      const pane: PaneNode = { type: 'pane', id: uid(), sessionId: '' }
+      out.push(pane)
+      return pane
+    }
     try {
       let info: SessionInfo
       if ('hostId' in p) {
@@ -113,7 +119,7 @@ export async function restoreWorkspace(saved: SavedWorkspace | undefined, enable
       const t = saved.tabs[i]
       const ps: PaneNode[] = []
       const root = await build(t.root, ps)
-      if (!root) continue
+      if (!root || ps.every(isEmptyPane)) continue
       const tab: Tab = { id: uid(), root, focused: (ps[t.focused] ?? ps[0]).id, broadcast: false, title: t.title, zoomed: t.zoomed != null && ps[t.zoomed] ? ps[t.zoomed].id : null }
       tabs.push(tab)
       if (i === saved.active) activeTab = tab.id

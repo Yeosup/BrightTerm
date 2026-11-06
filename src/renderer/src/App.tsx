@@ -12,6 +12,7 @@ import { RightPanel, PreviewDialog } from './components/RightPanel'
 import { StatusBar } from './components/StatusBar'
 import { LockScreen } from './components/LockScreen'
 import { HostEditor, GroupEditor } from './components/HostEditor'
+import { PlaceDialog } from './components/PlaceDialog'
 import { QuickConnect } from './components/QuickConnect'
 import { SettingsDialog } from './components/SettingsDialog'
 import { ImportDialog } from './components/ImportDialog'
@@ -193,6 +194,7 @@ export default function App(): JSX.Element {
       {dialog?.kind === 'settings' && <SettingsDialog section={dialog.section} />}
       {dialog?.kind === 'import' && <ImportDialog />}
       {dialog?.kind === 'preview' && <PreviewDialog sessionId={dialog.sessionId} path={dialog.path} />}
+      {dialog?.kind === 'place' && <PlaceDialog title={dialog.title} hostId={dialog.hostId} adhoc={dialog.adhoc} />}
       <UiRequestDialog />
       <ConfirmDialog />
       <PromptDialog />

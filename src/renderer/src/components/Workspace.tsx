@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Columns2, Rows2, X, Maximize2, Minimize2, FolderTree, RotateCw, Search, ChevronUp, ChevronDown, ImageUp, Radio } from 'lucide-react'
-import { useApp, Tab } from '../state'
-import { LayoutNode, PaneNode, panes, setSizes } from '../layout'
+import { Columns2, Rows2, X, Maximize2, Minimize2, FolderTree, RotateCw, Search, ChevronUp, ChevronDown, ImageUp, Radio, GripVertical, SquareTerminal, Zap, SquareDashed } from 'lucide-react'
+import { useApp, Tab, type DropZone } from '../state'
+import { LayoutNode, PaneNode, panes, setSizes, isEmptyPane } from '../layout'
 import { attach, detach, fitEntry, getEntry, smartPaste, uploadAndInsert, disposeEntry } from '../terms'
 import { api } from '../api'
 import { ENV_COLORS, ENV_LABELS } from '@shared/types'
@@ -39,13 +39,13 @@ function TabView({ tab, active }: { tab: Tab; active: boolean }): JSX.Element {
   }, [active, tab.root, tab.focused, tab.zoomed])
   if (tab.zoomed) {
     const p = panes(tab.root).find((x) => x.id === tab.zoomed)
-    if (p) return <Pane tab={tab} pane={p} />
+    if (p) return isEmptyPane(p) ? <EmptySlot tab={tab} pane={p} /> : <Pane tab={tab} pane={p} />
   }
   return <Node tab={tab} node={tab.root} />
 }
 
 function Node({ tab, node }: { tab: Tab; node: LayoutNode }): JSX.Element {
-  if (node.type === 'pane') return <Pane tab={tab} pane={node} />
+  if (node.type === 'pane') return isEmptyPane(node) ? <EmptySlot key={`e-${node.id}`} tab={tab} pane={node} /> : <Pane key={node.sessionId} tab={tab} pane={node} />
   return <Split tab={tab} node={node} />
 }
 
@@ -107,6 +107,7 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
   const multi = panes(tab.root).length > 1
   const bodyRef = useRef<HTMLDivElement>(null)
   const [dropping, setDropping] = useState(false)
+  const drop = usePaneDrop(tab, pane)
   const [find, setFind] = useState<string | null>(null)
   const findRef = useRef<HTMLInputElement>(null)
   const st = useApp.getState
@@ -191,17 +192,19 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
       data-pane={pane.id}
       style={{ ['--pane-color' as string]: color ?? 'var(--accent)', ['--term-bg' as string]: termBg }}
       onMouseDown={() => { if (!focused || useApp.getState().activeTab !== tab.id) st().focusPane(tab.id, pane.id) }}
-      onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDropping(true) } }}
-      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDropping(false) }}
+      onDragOver={(e) => { if (drop.over(e)) return; if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDropping(true) } }}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) { setDropping(false); drop.leave() } }}
       onDrop={(e) => {
         e.preventDefault()
         setDropping(false)
+        if (drop.drop(e)) return
         const paths = Array.from(e.dataTransfer.files).map((f) => api.pathForFile(f)).filter(Boolean)
         if (paths.length) uploadAndInsert(pane.sessionId, { kind: 'files', paths })
       }}
     >
       {(
-        <div className="pane-head" style={color ? { background: `color-mix(in srgb, ${color} ${focused ? 22 : 12}%, var(--bg-3))`, borderBottomColor: color } : undefined}>
+        <div className="pane-head" draggable onDragStart={(e) => startPaneDrag(e, tab, pane)} onDragEnd={endPaneDrag} title="끌어서 다른 칸과 자리 바꾸기·옮기기" style={color ? { background: `color-mix(in srgb, ${color} ${focused ? 22 : 12}%, var(--bg-3))`, borderBottomColor: color } : undefined}>
+          <GripVertical size={12} className="ph-grip" />
           <span className={`dot ${info?.state ?? 'closed'}`} />
           {env && <span className="env-tag" style={{ background: ENV_COLORS[env] }}>{ENV_LABELS[env]}</span>}
           <span className="ph-title">{info?.title ?? '세션'}</span>
@@ -239,9 +242,122 @@ function Pane({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
           <button className="ibtn sm" onClick={() => { setFind(null); getEntry(pane.sessionId)?.search.clearDecorations() }}><X size={14} /></button>
         </div>
       )}
+      {drop.zone && <div className={`drop-zone dz-${drop.zone}`}><span>{drop.label}</span></div>}
       {dropping && (
         <div className="pane-drop"><div><ImageUp size={18} /> {info?.canSftp ? `서버(${settings.uploadDir})로 업로드하고 경로를 입력합니다` : info?.protocol === 'local' ? '파일 경로를 입력합니다 (이미지는 저장 후 경로)' : '파일 경로를 입력합니다'}</div></div>
       )}
+    </div>
+  )
+}
+
+// ---------------- 칸 끌어 놓기 · 빈 칸 ----------------
+
+/** 지금 끌고 있는 칸(같은 창 안). dragover 중에는 dataTransfer 내용을 못 읽어서 따로 기억한다 */
+let draggingPane: { tabId: string; paneId: string } | null = null
+
+function startPaneDrag(e: React.DragEvent, tab: Tab, pane: PaneNode): void {
+  if ((e.target as HTMLElement).closest('button')) return e.preventDefault()
+  draggingPane = { tabId: tab.id, paneId: pane.id }
+  e.dataTransfer.setData('bt/pane', `${tab.id}|${pane.id}`)
+  e.dataTransfer.effectAllowed = 'move'
+}
+
+function endPaneDrag(): void {
+  draggingPane = null
+}
+
+const ZONE_LABEL: Record<DropZone, string> = { center: '', left: '왼쪽에', right: '오른쪽에', top: '위에', bottom: '아래에' }
+
+/** 마우스 위치 → 놓을 자리. 빈 칸은 늘 가운데(채우기), 서버를 이미 쓰는 칸 위로 서버를 끌면 가장자리만 */
+function zoneAt(e: React.DragEvent, el: HTMLElement, allowCenter: boolean, onlyCenter: boolean): DropZone {
+  if (onlyCenter) return 'center'
+  const r = el.getBoundingClientRect()
+  const x = (e.clientX - r.left) / r.width
+  const y = (e.clientY - r.top) / r.height
+  const d = { left: x, right: 1 - x, top: y, bottom: 1 - y }
+  const [edge, dist] = (Object.entries(d) as [DropZone, number][]).sort((a, b) => a[1] - b[1])[0]
+  return allowCenter && dist > 0.25 ? 'center' : edge
+}
+
+function usePaneDrop(tab: Tab, pane: PaneNode): { zone: DropZone | null; label: string; over: (e: React.DragEvent) => boolean; leave: () => void; drop: (e: React.DragEvent) => boolean } {
+  const [zone, setZone] = useState<DropZone | null>(null)
+  const [kind, setKind] = useState<'pane' | 'host' | null>(null)
+  const empty = isEmptyPane(pane)
+  const over = (e: React.DragEvent): boolean => {
+    const types = e.dataTransfer.types
+    const k = types.includes('bt/pane') && draggingPane?.tabId === tab.id ? 'pane' : types.includes('bt/host') ? 'host' : null
+    if (!k || (k === 'pane' && draggingPane?.paneId === pane.id)) { if (zone) setZone(null); return false }
+    e.preventDefault()
+    e.dataTransfer.dropEffect = k === 'pane' ? 'move' : 'copy'
+    const z = zoneAt(e, e.currentTarget as HTMLElement, k === 'pane', empty)
+    if (z !== zone) setZone(z)
+    if (k !== kind) setKind(k)
+    return true
+  }
+  const drop = (e: React.DragEvent): boolean => {
+    const z = zone
+    setZone(null)
+    if (!z) return false
+    const st = useApp.getState()
+    const p = e.dataTransfer.getData('bt/pane')
+    if (p) {
+      const [tabId, src] = p.split('|')
+      if (tabId === tab.id) st.dropPane(tab.id, src, pane.id, z)
+      return true
+    }
+    const hostId = e.dataTransfer.getData('bt/host')
+    if (hostId) {
+      void st.openHost(hostId, { tabId: tab.id, paneId: pane.id, zone: z })
+      return true
+    }
+    return false
+  }
+  const label = !zone ? '' : zone === 'center' ? (empty ? '이 칸에 열기' : '자리 바꾸기') : `${ZONE_LABEL[zone]} ${kind === 'host' ? '열기' : '옮기기'}`
+  return { zone, label, over, leave: () => setZone(null), drop }
+}
+
+function EmptySlot({ tab, pane }: { tab: Tab; pane: PaneNode }): JSX.Element {
+  const hosts = useApp((s) => s.hosts)
+  const focused = tab.focused === pane.id
+  const drop = usePaneDrop(tab, pane)
+  const st = useApp.getState
+  const select = (): void => st().focusPane(tab.id, pane.id)
+  const recent = [...hosts].filter((h) => h.lastUsedAt).sort((a, b) => (b.lastUsedAt ?? 0) - (a.lastUsedAt ?? 0)).slice(0, 6)
+  return (
+    <div
+      className={`pane empty-slot ${focused ? 'focused' : ''}`}
+      data-pane={pane.id}
+      tabIndex={-1}
+      onMouseDown={() => { if (!focused || st().activeTab !== tab.id) select() }}
+      onDragOver={(e) => drop.over(e)}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) drop.leave() }}
+      onDrop={(e) => { e.preventDefault(); drop.drop(e) }}
+    >
+      <div className="pane-head">
+        <SquareDashed size={13} />
+        <span className="ph-title">빈 칸</span>
+        <span className="ph-actions">
+          <button className="ibtn sm" title="칸 없애기 (남은 칸이 이 자리를 채웁니다)" onClick={() => st().closePane(pane.id, tab.id)}><X size={13} /></button>
+        </span>
+      </div>
+      <div className="empty-body">
+        <div className="empty-hint">사이드바에서 서버를 이 칸으로 끌어다 놓거나,<br />이 칸을 선택한 채 서버를 더블클릭하면 여기에 열립니다</div>
+        <div className="empty-actions">
+          <button className="btn" onClick={() => { select(); useApp.setState({ dialog: { kind: 'quick' } }) }}><Zap size={14} />서버 고르기</button>
+          <button className="btn" onClick={() => { select(); void st().openAdhoc({ host: '', protocol: 'local' }, { tabId: tab.id, paneId: pane.id, zone: 'center' }) }}><SquareTerminal size={14} />로컬 터미널</button>
+          <button className="btn" onClick={() => st().closePane(pane.id, tab.id)}><X size={14} />칸 없애기</button>
+        </div>
+        {recent.length > 0 && (
+          <div className="empty-recent">
+            {recent.map((h) => (
+              <button key={h.id} className="chip" title={`${h.username ? h.username + '@' : ''}${h.host}`} onClick={() => void st().openHost(h.id, { tabId: tab.id, paneId: pane.id, zone: 'center' })}>
+                {h.alias || h.host}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {drop.zone && <div className={`drop-zone dz-${drop.zone}`}><span>{drop.label}</span></div>}
     </div>
   )
 }

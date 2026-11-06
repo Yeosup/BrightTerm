@@ -372,21 +372,54 @@ input, textarea, select, button { font: inherit; color: inherit; }
 .import-row.head { color: var(--text-3); font-size: 11.5px; position: sticky; top: 0; background: var(--bg-2); }
 .preview-img { max-width: 100%; max-height: 62vh; object-fit: contain; border-radius: 6px; background: repeating-conic-gradient(var(--bg-3) 0% 25%, var(--bg) 0% 50%) 50% / 16px 16px; }
 
-/* ---------- banners (광고) — 작업 영역 밖에만 둔다 ---------- */
-.ad-banner { position: relative; flex-shrink: 0; }
-.ad-frame { position: relative; display: grid; width: 100%; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; background: #fff; }
-/* 배너를 한 칸에 겹쳐 두고 보이는 것만 불투명 — 높이는 이미지가 정한다 */
-.ad-frame img { grid-area: 1 / 1; display: block; width: 100%; height: auto; opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
-.ad-frame img.on { opacity: 1; }
-.ad-frame:hover { border-color: var(--accent); }
-.ad-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ad-tag { position: absolute; top: 6px; right: 6px; font-size: 10px; line-height: 1; padding: 3px 5px; border-radius: 4px; background: rgba(15, 17, 21, 0.55); color: #fff; }
-@media (prefers-reduced-motion: reduce) { .ad-frame img { transition: none; } }
-.ad-welcome { width: 100%; margin: 20px 0 4px; }
-.ad-sidebar { margin: 8px 10px 10px; }
-
 /* 서버 편집 — 직접 입력한 베스천 */
 .jump-inline { display: flex; flex-direction: column; gap: 10px; margin: -4px 0 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
 .persist-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
 .persist-box .toggle { padding: 0; border: 0; }
 .ph-persist { margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 10.5px; font-weight: 600; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+/* 빈 칸 · 칸 끌어 놓기 */
+.pane-head[draggable="true"] { cursor: grab; }
+.pane-head .ph-grip { opacity: 0.35; flex-shrink: 0; margin-right: -2px; }
+.pane-head:hover .ph-grip { opacity: 0.8; }
+.empty-slot { display: flex; flex-direction: column; background: var(--bg-2); outline: none; }
+.empty-slot .pane-head { cursor: default; color: var(--text-2); gap: 6px; }
+.empty-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; border: 2px dashed var(--border); border-radius: 12px; margin: 12px; text-align: center; }
+.empty-slot.focused .empty-body { border-color: color-mix(in srgb, var(--accent) 60%, var(--border)); }
+.empty-hint { font-size: 12.5px; color: var(--text-2); line-height: 1.6; }
+.empty-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.empty-recent { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 420px; }
+.empty-recent .chip { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg-3); color: var(--text); font-size: 12px; cursor: pointer; }
+.empty-recent .chip:hover { border-color: var(--accent); }
+.drop-zone { position: absolute; z-index: 30; pointer-events: none; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--accent); border-radius: 8px; background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.drop-zone span { padding: 4px 10px; border-radius: 6px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; }
+.dz-center { inset: 18%; }
+.dz-left { left: 0; top: 0; bottom: 0; width: 50%; }
+.dz-right { right: 0; top: 0; bottom: 0; width: 50%; }
+.dz-top { left: 0; right: 0; top: 0; height: 50%; }
+.dz-bottom { left: 0; right: 0; bottom: 0; height: 50%; }
+
+/* 위치 골라서 연결 */
+.place-newtab { align-self: flex-start; }
+.place-hint { font-size: 12.5px; color: var(--text-2); margin-top: -4px; }
+.place-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.place-tab { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-3); }
+.place-tab.active { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+.place-tab-title { font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.place-now { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 6px; color: var(--accent); background: var(--accent-soft); }
+.place-map { aspect-ratio: 16 / 10; display: flex; }
+.place-split { flex: 1; display: flex; gap: 3px; min-width: 0; min-height: 0; }
+.place-split.s-row { flex-direction: row; }
+.place-split.s-col { flex-direction: column; }
+.place-child { display: flex; min-width: 0; min-height: 0; }
+.place-cell { position: relative; flex: 1; min-width: 0; min-height: 0; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--cell, var(--text-3)) 60%, var(--border)); background: color-mix(in srgb, var(--cell, var(--text-3)) 14%, var(--bg-2)); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.place-cell.focused { box-shadow: inset 0 0 0 1px var(--accent); }
+.place-cell.empty { border-style: dashed; color: var(--text-2); gap: 4px; flex-direction: column; font-size: 11.5px; cursor: pointer; background: transparent; }
+.place-cell.empty:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.place-name { font-size: 11px; padding: 0 22px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.place-edge { position: absolute; display: flex; align-items: center; justify-content: center; border: 0; padding: 0; cursor: pointer; color: var(--text-2); background: transparent; }
+.place-edge:hover { color: #fff; background: color-mix(in srgb, var(--accent) 70%, transparent); }
+.pe-left { left: 0; top: 0; bottom: 0; width: 20px; }
+.pe-right { right: 0; top: 0; bottom: 0; width: 20px; }
+.pe-top { left: 20px; right: 20px; top: 0; height: 18px; }
+.pe-bottom { left: 20px; right: 20px; bottom: 0; height: 18px; }

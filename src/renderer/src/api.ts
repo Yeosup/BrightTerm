@@ -1,5 +1,5 @@
 import type {
-  AdhocTarget, Banner, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, Transfer, UiRequest, UpdateInfo, VaultStatus
+  AdhocTarget, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, Transfer, UiRequest, UpdateInfo, VaultStatus
 } from '@shared/types'
 
 interface Bt {
@@ -33,7 +33,6 @@ export const api = {
     storeChanged: (cb: () => void) => bt.on('store:changed', cb as never),
     toast: (cb: (t: { kind: 'ok' | 'error' | 'info'; text: string }) => void) => bt.on('toast', cb as never),
     menu: (cb: (action: string) => void) => bt.on('menu:action', cb as never),
-    ads: (cb: () => void) => bt.on('ads:changed', cb as never),
     update: (cb: (u: UpdateInfo | null) => void) => bt.on('update:changed', cb as never)
   },
   store: {
@@ -109,11 +108,7 @@ export const api = {
     resetWindow: () => bt.call<void>('app:resetWindow'),
     openLegal: (kind: 'license' | 'notices' | 'chromium') => bt.call<void>('app:openLegal', kind),
     openExternal: (u: string) => bt.call<void>('app:openExternal', u),
-    toggleFullScreen: () => bt.call<void>('app:toggleFullScreen'),
-    openBanner: (u: string) => bt.call<void>('app:openBanner', u)
-  },
-  ads: {
-    get: () => bt.call<(Omit<Banner, 'image'> & { image: string })[]>('ads:get')
+    toggleFullScreen: () => bt.call<void>('app:toggleFullScreen')
   },
   update: {
     get: () => bt.call<UpdateInfo | null>('update:get'),

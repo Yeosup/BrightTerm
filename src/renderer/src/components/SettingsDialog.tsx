@@ -81,6 +81,8 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
             <>
               <div className="card">
                 <Toggle label="선택하면 자동 복사" desc="PuTTY처럼 마우스로 드래그하면 바로 클립보드에 복사됩니다" value={settings.copyOnSelect} onChange={(v) => set({ copyOnSelect: v })} />
+                <Toggle label="원격 복사를 이 PC 클립보드로" desc="tmux 마우스 선택·vim·Claude Code 등이 보내는 복사(OSC 52)를 클립보드에 넣습니다. 클립보드 읽기 요청은 거절합니다" value={settings.osc52Clipboard} onChange={(v) => set({ osc52Clipboard: v })} />
+                <Toggle label="Shift+Enter 로 줄바꿈" desc="명령을 실행하지 않고 새 줄을 넣습니다 (Claude Code 등 여러 줄 입력). 끄면 Enter 와 같습니다" value={settings.shiftEnterNewline} onChange={(v) => set({ shiftEnterNewline: v })} />
                 <Toggle label="오른쪽 클릭으로 붙여넣기" desc="끄면 오른쪽 클릭 시 메뉴가 나옵니다 (켜져 있어도 Shift+오른쪽 클릭은 메뉴)" value={settings.rightClickPaste} onChange={(v) => set({ rightClickPaste: v })} />
                 {!isMac && <Toggle label="Ctrl+V로 붙여넣기" desc="끄면 Ctrl+V가 서버로 전달되고, 붙여넣기는 Ctrl+Shift+V" value={settings.ctrlVPaste} onChange={(v) => set({ ctrlVPaste: v })} />}
                 <Toggle label="여러 줄 붙여넣기 확인" desc="여러 줄을 붙여넣으면 실행 전에 한 번 확인합니다" value={settings.confirmMultilinePaste} onChange={(v) => set({ confirmMultilinePaste: v })} />

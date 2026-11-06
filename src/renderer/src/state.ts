@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { CredentialMeta, Group, Host, SessionInfo, Settings, Snippet, StoreData, Transfer, UiRequest, VaultStatus, AdhocTarget } from '@shared/types'
 import { DEFAULT_SETTINGS } from '@shared/types'
 import { api } from './api'
-import { LayoutNode, PaneNode, uid, panes, splitPane, removePane, grid, Dir, findPane } from './layout'
+import { LayoutNode, PaneNode, uid, panes, splitPane, removePane, grid, Dir, findPane, isEmptyPane, setPaneSession, swapPanes, movePane } from './layout'
 
 export interface Tab {
   id: string
@@ -12,6 +12,10 @@ export interface Tab {
   title?: string
   zoomed?: string | null
 }
+
+/** 열 위치 — 새 탭 / 지금 칸 옆(분할) / 특정 탭의 특정 칸(빈 칸 채우기 'center' 또는 그 칸의 한쪽) */
+export type DropZone = 'center' | 'left' | 'right' | 'top' | 'bottom'
+export type Placement = 'tab' | Dir | { tabId: string; paneId: string; zone: DropZone }
 
 export interface MenuItem {
   label?: string
@@ -40,6 +44,7 @@ type Dialog =
   | { kind: 'import' }
   | { kind: 'quick' }
   | { kind: 'preview'; sessionId: string; path: string }
+  | { kind: 'place'; title: string; hostId?: string; adhoc?: AdhocTarget }
   | null
 
 interface State {
@@ -75,14 +80,16 @@ interface State {
   upsertGroup(g: Group): void
   removeGroup(id: string): void
 
-  openHost(hostId: string, where?: 'tab' | Dir): Promise<void>
+  openHost(hostId: string, where?: Placement): Promise<void>
   /** 이미 열린 세션이 있으면 그 탭·패널로 이동(여러 개면 누를 때마다 다음 것). 없으면 false */
   revealHost(hostId: string): boolean
   /** 포커스된 패널의 서버 id — 사이드바 선택 동기화용 */
   focusedHostId(): string | null
-  openAdhoc(t: AdhocTarget, where?: 'tab' | Dir): Promise<void>
+  openAdhoc(t: AdhocTarget, where?: Placement): Promise<void>
   openGroupGrid(groupId: string): Promise<void>
   closePane(paneId: string, tabId?: string): Promise<void>
+  /** 같은 탭 안에서 칸 끌어 놓기 — center = 맞바꾸기, 가장자리 = 그쪽으로 옮기기 */
+  dropPane(tabId: string, src: string, target: string, zone: DropZone): void
   closeTab(tabId: string, force?: boolean): Promise<void>
   focusPane(tabId: string, paneId: string): void
   setActiveTab(id: string): void
@@ -249,8 +256,11 @@ export const useApp = create<State>((set, get) => ({
     if (!tab) return
     const pane = findPane(tab.root, paneId)
     if (!pane) return
-    api.session.close(pane.sessionId)
-    const root = removePane(tab.root, paneId)
+    if (pane.sessionId) api.session.close(pane.sessionId)
+    // 분할 중이면 닫은 자리를 빈 칸으로 남긴다(그 자리에 다시 열기). 빈 칸을 또 닫으면 칸을 없앤다.
+    const keep = s.settings.keepEmptySlot && !isEmptyPane(pane) && panes(tab.root).length > 1
+    let root: LayoutNode | null = keep ? setPaneSession(tab.root, paneId, '') : removePane(tab.root, paneId)
+    if (root && panes(root).every(isEmptyPane)) root = null // 남은 게 빈 칸뿐이면 탭을 닫는다
     set((st) => {
       const sessions = { ...st.sessions }
       delete sessions[pane.sessionId]
@@ -260,9 +270,19 @@ export const useApp = create<State>((set, get) => ({
         const activeTab = st.activeTab === tab.id ? (tabs[Math.min(idx, tabs.length - 1)]?.id ?? null) : st.activeTab
         return { tabs, activeTab, sessions }
       }
-      const focused = tab.focused === paneId ? panes(root)[0].id : tab.focused
+      const focused = keep || tab.focused !== paneId ? tab.focused : panes(root).find((p) => !isEmptyPane(p))?.id ?? panes(root)[0].id
       return { tabs: st.tabs.map((t) => (t.id === tab.id ? { ...t, root, focused, zoomed: null } : t)), sessions }
     })
+  },
+
+  dropPane(tabId, src, target, zone) {
+    const tab = get().tabs.find((t) => t.id === tabId)
+    if (!tab || src === target) return
+    const root = zone === 'center'
+      ? swapPanes(tab.root, src, target)
+      : movePane(tab.root, src, target, zone === 'left' || zone === 'right' ? 'row' : 'col', zone === 'left' || zone === 'top')
+    // 맞바꾸면 끌던 세션은 target 칸으로 간다
+    get().updateTab(tabId, { root, focused: zone === 'center' ? target : src, zoomed: null })
   },
 
   async closeTab(tabId, force = false) {
@@ -365,11 +385,27 @@ export const useApp = create<State>((set, get) => ({
   }
 }))
 
-function placeSession(info: SessionInfo, where: 'tab' | Dir): void {
+function placeSession(info: SessionInfo, where: Placement): void {
   const st = useApp.getState()
   useApp.setState((s) => ({ sessions: { ...s.sessions, [info.id]: info } }))
   const pane: PaneNode = { type: 'pane', id: uid(), sessionId: info.id }
+  const put = (tabId: string, root: LayoutNode, focused: string): void =>
+    useApp.setState((s) => ({ tabs: s.tabs.map((t) => (t.id === tabId ? { ...t, root, focused, zoomed: null } : t)), activeTab: tabId }))
+  if (typeof where === 'object') {
+    const w = where
+    const t = st.tabs.find((x) => x.id === w.tabId)
+    const target = t && findPane(t.root, w.paneId)
+    if (t && target) {
+      if (w.zone === 'center' && isEmptyPane(target)) return put(t.id, setPaneSession(t.root, target.id, info.id), target.id)
+      const zone = w.zone === 'center' ? 'right' : w.zone
+      return put(t.id, splitPane(t.root, target.id, zone === 'left' || zone === 'right' ? 'row' : 'col', pane, zone === 'left' || zone === 'top'), pane.id)
+    }
+    where = 'tab'
+  }
   const tab = st.tabs.find((t) => t.id === st.activeTab)
+  // 지금 선택한 칸이 빈 칸이면 새 탭·분할 대신 그 칸에 연다
+  const fp = tab && findPane(tab.root, tab.focused)
+  if (tab && fp && isEmptyPane(fp)) return put(tab.id, setPaneSession(tab.root, fp.id, info.id), fp.id)
   if (where === 'tab' || !tab) {
     const t: Tab = { id: uid(), root: pane, focused: pane.id, broadcast: false }
     useApp.setState((s) => ({ tabs: [...s.tabs, t], activeTab: t.id }))

@@ -3,7 +3,6 @@ import { useApp } from '../state'
 import { hostColor, hostTarget, ProtoIcon } from './Sidebar'
 import { SC, isMac } from '../platform'
 import logo from '../assets/logo.png'
-import { AdBanner } from './AdBanner'
 
 export const SHORTCUTS: [string, string][] = [
   ['빠른 접속 / 명령', SC.quick],
@@ -43,7 +42,6 @@ export function Welcome(): JSX.Element {
           <button className="btn" onClick={() => useApp.setState({ dialog: { kind: 'host', groupId: null } })}><Plus size={15} />새 서버 등록</button>
           <button className="btn" onClick={() => useApp.setState({ dialog: { kind: 'import' } })}><Download size={15} />{isMac ? 'SSH config 가져오기' : 'PuTTY에서 가져오기'}</button>
         </div>
-        <AdBanner slot="welcome" />
         {recent.length > 0 && (
           <div className="recent-grid">
             {recent.map((h) => (

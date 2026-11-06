@@ -12,7 +12,7 @@ import { listSerialPorts } from './transports/serial'
 import { hasTmux, listShells } from './transports/local'
 import { initialBounds, resetWindow, trackWindow } from './windowState'
 import { scanAws } from './aws'
-import { cachedBanners, refreshBanners } from './ads'
+import { removeBannerCache } from './ads'
 import { checkUpdate, startUpdateCheck, updateInfo } from './update'
 import type { AdhocTarget, CredentialInput, Group, Host, ImportCandidate, StoreData } from '@shared/types'
 
@@ -230,10 +230,8 @@ function registerIpc(): void {
     if (err) throw new Error(err)
   })
   handle('app:openExternal', (url: string) => { if (/^https?:\/\//.test(url)) shell.openExternal(url) })
-  handle('ads:get', () => cachedBanners())
   handle('update:get', () => updateInfo())
   handle('update:check', () => checkUpdate())
-  handle('app:openBanner', (url: string) => { if (/^https:\/\//.test(url)) shell.openExternal(url) })
   handle('app:toggleFullScreen', () => win?.setFullScreen(!win.isFullScreen()))
   handle('app:resetWindow', () => { if (win) resetWindow(win) })
 }
@@ -422,7 +420,7 @@ app.whenReady().then(() => {
   registerIpc()
   createWindow()
   startAutoLock()
-  setTimeout(() => void refreshBanners(), 3000)
+  removeBannerCache()
   startUpdateCheck()
 })
 

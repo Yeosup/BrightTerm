@@ -106,6 +106,12 @@ export interface Settings {
   cursorBlink: boolean
   scrollback: number
   copyOnSelect: boolean
+  /** 원격 프로그램(tmux·vim·Claude Code)이 OSC 52 로 보낸 복사 내용을 이 PC 클립보드에 넣기 */
+  osc52Clipboard: boolean
+  /** 분할 중 창을 닫으면 그 자리를 빈 칸으로 남기기(빈 칸을 다시 닫으면 칸 제거) */
+  keepEmptySlot: boolean
+  /** Shift+Enter = 줄바꿈(ESC+CR — Claude Code 등에서 입력 중 새 줄) */
+  shiftEnterNewline: boolean
   rightClickPaste: boolean
   ctrlVPaste: boolean
   confirmMultilinePaste: boolean
@@ -132,7 +138,7 @@ export interface Settings {
 export interface UpdateInfo { version: string; url: string }
 
 /** 앱을 다시 켤 때 복원할 탭·분할 — 창마다 서버 id 또는 로컬 시작 폴더만 기억한다 */
-export type SavedPane = { hostId: string } | { local: { cwd?: string } }
+export type SavedPane = { hostId: string } | { local: { cwd?: string } } | { empty: true }
 export type SavedLayout =
   | { type: 'pane'; pane: SavedPane }
   | { type: 'split'; dir: 'row' | 'col'; sizes: number[]; children: SavedLayout[] }
@@ -265,6 +271,9 @@ export const DEFAULT_SETTINGS: Settings = {
   cursorBlink: true,
   scrollback: 10000,
   copyOnSelect: true,
+  osc52Clipboard: true,
+  shiftEnterNewline: true,
+  keepEmptySlot: true,
   rightClickPaste: true,
   ctrlVPaste: true,
   confirmMultilinePaste: true,
@@ -301,21 +310,3 @@ export const ENV_LABELS: Record<Env, string> = {
 }
 
 export const PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#22c55e', '#10b981', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#64748b']
-
-// ---------- banners (광고) ----------
-
-export type BannerSlot = 'welcome' | 'sidebar'
-
-/** 원격 피드의 배너 한 건. image 는 https URL(메인이 받아 data: URL 로 바꿔 넘긴다), link 는 https 만. */
-export interface Banner {
-  id: string
-  slot: BannerSlot
-  image: string
-  link: string
-  alt: string
-  /** 같은 슬롯 안 노출 비중 (기본 1) */
-  weight?: number
-  /** ISO 날짜. 이 기간 밖이면 숨긴다 */
-  start?: string
-  end?: string
-}
