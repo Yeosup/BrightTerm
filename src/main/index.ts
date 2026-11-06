@@ -13,6 +13,7 @@ import { hasTmux, listShells } from './transports/local'
 import { initialBounds, resetWindow, trackWindow } from './windowState'
 import { scanAws } from './aws'
 import { removeBannerCache } from './ads'
+import { runSync, startSync, syncOnUnlock, syncStatus, type SyncMode } from './sync'
 import { checkUpdate, startUpdateCheck, updateInfo } from './update'
 import type { AdhocTarget, CredentialInput, Group, Host, ImportCandidate, StoreData } from '@shared/types'
 
@@ -100,6 +101,8 @@ function registerIpc(): void {
 
   // vault
   handle('vault:status', () => vault.status())
+  handle('sync:status', () => syncStatus())
+  handle('sync:run', (mode: SyncMode) => runSync(mode))
   handle('vault:setup', (pw: string) => vault.setup(pw))
   handle('vault:unlock', (pw: string) => vault.unlock(pw))
   handle('vault:unlockOs', () => vault.tryOsUnlock(win))
@@ -416,7 +419,15 @@ app.whenReady().then(() => {
   Menu.setApplicationMenu(process.platform === 'darwin' ? buildMacMenu() : null)
   store.load()
   vault.init()
-  vault.onLockChange = (u) => send('vault:changed', u)
+  vault.onLockChange = (u) => {
+    send('vault:changed', u)
+    if (u) syncOnUnlock()
+  }
+  startSync({
+    onStatus: (s) => send('sync:status', s),
+    // 동기화로 받은 서버·계정을 화면에 반영
+    onApplied: () => { send('store:changed'); send('vault:changed', true) }
+  })
   registerIpc()
   createWindow()
   startAutoLock()

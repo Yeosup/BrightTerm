@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Palette, Keyboard, ImageUp, Plug, Shield, Archive, Info, Trash2, FolderOpen } from 'lucide-react'
+import { Palette, Keyboard, ImageUp, Plug, Shield, Archive, Info, Trash2, FolderOpen, RefreshCw } from 'lucide-react'
 import { useApp } from '../state'
 import { api } from '../api'
 import { Modal, Field, Toggle, Seg } from './ui'
 import { TERMINAL_THEMES } from '../themes'
 import { SHORTCUTS } from './Welcome'
-import { DEFAULT_SETTINGS } from '@shared/types'
+import { DEFAULT_SETTINGS, type SyncStatus } from '@shared/types'
 import { isMac, SC, osUnlockText } from '../platform'
 
-type Sec = 'look' | 'input' | 'image' | 'conn' | 'security' | 'backup' | 'about'
+type Sec = 'look' | 'input' | 'image' | 'conn' | 'security' | 'sync' | 'backup' | 'about'
 
 export function SettingsDialog({ section }: { section?: string }): JSX.Element {
   const { settings, vault, creds, hosts } = useApp()
@@ -27,6 +27,7 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
     ['image', '이미지·파일 전송', <ImageUp size={15} key="c" />],
     ['conn', '연결', <Plug size={15} key="d" />],
     ['security', '보안·계정', <Shield size={15} key="e" />],
+    ['sync', '동기화 (git)', <RefreshCw size={15} key="s" />],
     ['backup', '백업', <Archive size={15} key="f" />],
     ['about', '정보·단축키', <Info size={15} key="g" />]
   ]
@@ -124,6 +125,7 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
               <button className="btn sm" style={{ alignSelf: 'flex-start' }} onClick={() => api.app.openLogs()}><FolderOpen size={13} />로그 폴더 열기</button>
             </>
           )}
+          {sec === 'sync' && <SyncSection />}
           {sec === 'security' && (
             <>
               <Field label="자동 잠금 (분)" hint={(isMac ? 'Mac을 이 시간 동안 사용하지 않거나, 화면을 잠그거나 잠자기에 들어가면' : 'PC를 이 시간 동안 사용하지 않거나, Windows를 잠그거나 절전하면') + ' 볼트를 잠급니다. 열린 세션은 유지됩니다. 0 = 사용 안 함'}>
@@ -235,5 +237,75 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
         </div>
       </div>
     </Modal>
+  )
+}
+
+function syncLine(s: SyncStatus | null): string {
+  if (!s || s.state === 'off') return '꺼짐 — 저장소 주소를 넣으면 켜집니다'
+  if (s.state === 'running') return '동기화 중...'
+  if (s.state === 'error') return `실패: ${s.error}`
+  if (s.state === 'mismatch') return s.error ?? '저장소의 볼트가 다릅니다'
+  if (!s.lastSyncAt) return '아직 동기화하지 않았습니다'
+  const parts = [`${new Date(s.lastSyncAt).toLocaleString()} 동기화`]
+  if (s.pulled) parts.push(`받음 ${s.pulled}`)
+  if (s.pushed) parts.push('올림')
+  if (s.conflicts) parts.push(`양쪽에서 고친 ${s.conflicts}개는 이 PC 것으로`)
+  if (!s.pulled && !s.pushed) parts.push('바뀐 것 없음')
+  return parts.join(' · ')
+}
+
+function SyncSection(): JSX.Element {
+  const sync = useApp((s) => s.settings.sync)
+  const st = useApp.getState
+  const [remote, setRemote] = useState(sync.remote)
+  const [branch, setBranch] = useState(sync.branch)
+  const [status, setStatus] = useState<SyncStatus | null>(null)
+  useEffect(() => {
+    api.sync.status().then(setStatus)
+    return api.on.sync(setStatus)
+  }, [])
+  const save = (p: Partial<typeof sync>): void => st().setSettings({ sync: { ...st().settings.sync, ...p } })
+  const run = async (mode: 'merge' | 'takeRemote' | 'pushLocal'): Promise<void> => {
+    save({ remote: remote.trim(), branch: branch.trim() || 'main' })
+    const r = await api.sync.run(mode)
+    setStatus(r)
+    if (r.state === 'idle' && mode === 'takeRemote') st().toast('info', '저장소의 볼트를 받았습니다 — 그 볼트의 마스터 비밀번호로 여세요')
+    else if (r.state === 'idle') st().toast('ok', '동기화했습니다')
+    else if (r.state === 'error') st().toast('error', `동기화 실패: ${r.error}`)
+  }
+  return (
+    <>
+      <div className="muted" style={{ lineHeight: 1.6 }}>
+        서버 목록·폴더·스니펫·저장된 계정을 git 저장소로 여러 PC 에 맞춥니다. 저장소에는 <b>볼트 키로 암호화한 파일 하나</b>만 올라가
+        주소·계정명도 평문으로 남지 않고, 다른 PC 는 <b>같은 마스터 비밀번호</b>로 엽니다. 비공개 저장소를 쓰세요.
+        인증은 이 PC 의 git 설정(SSH 키·자격 증명 도우미)을 그대로 씁니다.
+      </div>
+      <Field label="git 저장소 주소" hint="예: git@github.com:me/brightterm-sync.git — 비어 있는 새 저장소여도 됩니다">
+        <input className="input mono" placeholder="git@github.com:사용자/저장소.git" value={remote} onChange={(e) => setRemote(e.target.value)} onBlur={() => save({ remote: remote.trim() })} />
+      </Field>
+      <div className="grid2">
+        <Field label="브랜치"><input className="input mono" value={branch} onChange={(e) => setBranch(e.target.value)} onBlur={() => save({ branch: branch.trim() || 'main' })} /></Field>
+      </div>
+      <div className="card">
+        <Toggle label="자동 동기화" desc="볼트를 열 때, 서버·계정을 바꾸고 20초 뒤, 그리고 10분마다" value={sync.auto} onChange={(v) => save({ auto: v })} />
+      </div>
+      <div className="row">
+        <button className="btn sm primary" disabled={!remote.trim() || status?.state === 'running'} onClick={() => run('merge')}><RefreshCw size={13} />지금 동기화</button>
+        <span className={`muted sync-line ${status?.state ?? ''}`}>{syncLine(status)}</span>
+      </div>
+      {status?.state === 'mismatch' && (
+        <div className="card" style={{ gap: 10, padding: 12 }}>
+          <div>저장소에 <b>다른 볼트</b>(다른 마스터 비밀번호로 만든 볼트)가 있습니다. 어느 쪽으로 맞출까요?</div>
+          <div className="row">
+            <button className="btn sm" onClick={async () => {
+              if (await st().confirm({ title: '저장소 볼트 받기', message: '이 PC 의 볼트를 저장소의 볼트로 바꿉니다. 볼트가 잠기고, 저장소 볼트의 마스터 비밀번호로 열어야 합니다. 이 PC 에만 있던 저장된 계정은 사라집니다(서버 목록은 합쳐집니다).', okText: '받기', danger: true })) run('takeRemote')
+            }}>저장소 볼트 받기 (이 PC 가 새 PC 일 때)</button>
+            <button className="btn sm" onClick={async () => {
+              if (await st().confirm({ title: '이 PC 볼트로 덮어쓰기', message: '저장소의 동기화 파일을 이 PC 의 볼트·서버 목록으로 덮어씁니다. 다른 PC 들은 이 볼트의 마스터 비밀번호로 다시 맞춰야 합니다.', okText: '덮어쓰기', danger: true })) run('pushLocal')
+            }}>이 PC 볼트로 덮어쓰기</button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

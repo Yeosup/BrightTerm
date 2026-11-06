@@ -423,3 +423,5 @@ input, textarea, select, button { font: inherit; color: inherit; }
 .pe-right { right: 0; top: 0; bottom: 0; width: 20px; }
 .pe-top { left: 20px; right: 20px; top: 0; height: 18px; }
 .pe-bottom { left: 20px; right: 20px; bottom: 0; height: 18px; }
+
+.sync-line.error, .sync-line.mismatch { color: var(--danger); }

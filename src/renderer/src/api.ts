@@ -1,5 +1,5 @@
 import type {
-  AdhocTarget, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, Transfer, UiRequest, UpdateInfo, VaultStatus
+  AdhocTarget, ClipboardInfo, CredentialInput, CredentialMeta, CredentialSecret, ImportCandidate, SessionInfo, SftpEntry, StoreData, SyncStatus, Transfer, UiRequest, UpdateInfo, VaultStatus
 } from '@shared/types'
 
 interface Bt {
@@ -31,6 +31,7 @@ export const api = {
     transfer: (cb: (t: Transfer) => void) => bt.on('transfer:update', cb as never),
     vault: (cb: (unlocked: boolean) => void) => bt.on('vault:changed', cb as never),
     storeChanged: (cb: () => void) => bt.on('store:changed', cb as never),
+    sync: (cb: (s: SyncStatus) => void) => bt.on('sync:status', cb as never),
     toast: (cb: (t: { kind: 'ok' | 'error' | 'info'; text: string }) => void) => bt.on('toast', cb as never),
     menu: (cb: (action: string) => void) => bt.on('menu:action', cb as never),
     update: (cb: (u: UpdateInfo | null) => void) => bt.on('update:changed', cb as never)
@@ -109,6 +110,10 @@ export const api = {
     openLegal: (kind: 'license' | 'notices' | 'chromium') => bt.call<void>('app:openLegal', kind),
     openExternal: (u: string) => bt.call<void>('app:openExternal', u),
     toggleFullScreen: () => bt.call<void>('app:toggleFullScreen')
+  },
+  sync: {
+    status: () => bt.call<SyncStatus>('sync:status'),
+    run: (mode: 'merge' | 'takeRemote' | 'pushLocal' = 'merge') => bt.call<SyncStatus>('sync:run', mode)
   },
   update: {
     get: () => bt.call<UpdateInfo | null>('update:get'),

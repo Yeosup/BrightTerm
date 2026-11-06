@@ -84,6 +84,9 @@ class Vault {
     }
   }
 
+  /** 계정이 추가·수정·삭제되면 — sync.ts 가 자동 동기화를 예약한다 */
+  onDataChange: () => void = () => {}
+
   private save(): void {
     if (this.v) writeJsonAtomicSync(this.file, this.v)
   }
@@ -224,6 +227,7 @@ class Vault {
     const item: VaultItem = { id, name: input.name, kind: input.kind, username: secret.username, updatedAt: Date.now(), ...enc }
     this.v.items = [...this.v.items.filter((x) => x.id !== id), item]
     this.save()
+    this.onDataChange()
     const { name, kind, username, updatedAt } = item
     return { id, name, kind, username, updatedAt }
   }
@@ -232,10 +236,43 @@ class Vault {
     if (!this.v) return
     this.v.items = this.v.items.filter((x) => x.id !== id)
     this.save()
+    this.onDataChange()
   }
 
   exportRaw(): VaultFile | null {
     return this.v
+  }
+
+  // ---- git 동기화(sync.ts) — 볼트 키는 밖으로 내보내지 않고 여기서 암·복호화만 ----
+
+  /** 동기화로 올릴 볼트(이 기기에서만 열리는 osWrapped 제외) */
+  exportForSync(): Omit<VaultFile, 'osWrapped'> | null {
+    if (!this.v) return null
+    const { osWrapped: _drop, ...rest } = this.v
+    return rest
+  }
+
+  /** 같은 볼트 키로 병합한 결과를 반영 — 이 기기의 OS 잠금해제(osWrapped)는 키가 그대로라 유지 */
+  applySync(next: Omit<VaultFile, 'osWrapped'>): void {
+    this.requireKey()
+    if (!this.v) return
+    this.v = { ...next, osWrapped: this.v.osWrapped }
+    this.save()
+  }
+
+  sealWithKey(plain: string, aad: string): Enc {
+    this.requireKey()
+    return seal(this.key!, Buffer.from(plain, 'utf8'), aad)
+  }
+
+  /** 다른 볼트 키로 잠긴 데이터면 null */
+  openWithKey(e: Enc, aad: string): string | null {
+    this.requireKey()
+    try {
+      return open(this.key!, e, aad).toString('utf8')
+    } catch {
+      return null
+    }
   }
 
   importRaw(v: VaultFile): void {
@@ -249,4 +286,4 @@ class Vault {
 }
 
 export const vault = new Vault()
-export type { VaultFile }
+export type { VaultFile, Enc as VaultEnc }

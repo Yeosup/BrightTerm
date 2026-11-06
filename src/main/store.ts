@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS, MAC_FONT_FAMILY, StoreData, KnownHost, Settings } fro
 function withDefaults(saved: Partial<Settings> | undefined): Settings {
   const s = { ...DEFAULT_SETTINGS, ...(saved ?? {}) }
   if (process.platform === 'darwin' && s.fontFamily === DEFAULT_SETTINGS.fontFamily) s.fontFamily = MAC_FONT_FAMILY
+  s.sync = { ...DEFAULT_SETTINGS.sync, ...(saved?.sync ?? {}) }
   return s
 }
 
@@ -59,9 +60,13 @@ class Store {
     return this.data
   }
 
+  /** 동기화 대상(서버·폴더·스니펫·알려진 호스트)이 바뀌면 — sync.ts 가 자동 동기화를 예약한다 */
+  onDataChange: () => void = () => {}
+
   patch(p: Partial<StoreData>): void {
     this.data = { ...this.data, ...p }
     this.scheduleSave()
+    if (p.groups || p.hosts || p.snippets || p.knownHosts) this.onDataChange()
   }
 
   replaceAll(d: StoreData): void {
@@ -76,6 +81,7 @@ class Store {
   setKnownHost(k: KnownHost): void {
     this.data.knownHosts = [...this.data.knownHosts.filter((x) => x.hostPort !== k.hostPort), k]
     this.scheduleSave()
+    this.onDataChange()
   }
 
   touchHost(id: string): void {

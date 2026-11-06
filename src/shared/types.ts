@@ -108,6 +108,8 @@ export interface Settings {
   copyOnSelect: boolean
   /** 원격 프로그램(tmux·vim·Claude Code)이 OSC 52 로 보낸 복사 내용을 이 PC 클립보드에 넣기 */
   osc52Clipboard: boolean
+  /** 접속 정보·볼트를 git 저장소로 동기화(저장소엔 볼트 키로 암호화한 파일 하나) */
+  sync: SyncSettings
   /** 분할 중 창을 닫으면 그 자리를 빈 칸으로 남기기(빈 칸을 다시 닫으면 칸 제거) */
   keepEmptySlot: boolean
   /** Shift+Enter = 줄바꿈(ESC+CR — Claude Code 등에서 입력 중 새 줄) */
@@ -174,6 +176,24 @@ export interface CredentialInput extends CredentialSecret {
   id?: string
   name: string
   kind: 'password' | 'key'
+}
+
+export interface SyncSettings {
+  /** git 원격 주소(git@github.com:me/bt-sync.git 등). 비우면 동기화 안 함 */
+  remote: string
+  branch: string
+  /** 볼트를 열 때·바뀐 뒤·10분마다 자동 */
+  auto: boolean
+}
+
+export interface SyncStatus {
+  state: 'off' | 'idle' | 'running' | 'error' | 'mismatch'
+  lastSyncAt?: number
+  /** 마지막 동기화에서 바뀐 것 — 받은 항목 수 / 올렸는지 / 양쪽에서 고쳐 이 PC 것을 택한 수 */
+  pulled?: number
+  pushed?: boolean
+  conflicts?: number
+  error?: string
 }
 
 export interface VaultStatus {
@@ -274,6 +294,7 @@ export const DEFAULT_SETTINGS: Settings = {
   osc52Clipboard: true,
   shiftEnterNewline: true,
   keepEmptySlot: true,
+  sync: { remote: '', branch: 'main', auto: true },
   rightClickPaste: true,
   ctrlVPaste: true,
   confirmMultilinePaste: true,
