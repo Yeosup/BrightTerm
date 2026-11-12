@@ -50,7 +50,7 @@ const WIN: Record<string, Action> = {
   'mod+shift+f': 'find', 'mod+shift+s': 'sftp', 'mod+shift+b': 'broadcast', 'mod+shift+l': 'sidebar',
   'mod+shift+arrowleft': 'moveTabLeft', 'mod+shift+arrowright': 'moveTabRight', 'mod+tab': 'nextTab', 'mod+shift+tab': 'prevTab',
   'alt+arrowleft': 'paneLeft', 'alt+arrowright': 'paneRight', 'alt+arrowup': 'paneUp', 'alt+arrowdown': 'paneDown',
-  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', f11: 'fullscreen', 'mod+alt+t': 'localTerm'
+  'mod+=': 'fontUp', 'mod+shift+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', f11: 'fullscreen', 'mod+alt+t': 'localTerm'
 }
 
 const MAC: Record<string, Action> = {
@@ -60,7 +60,7 @@ const MAC: Record<string, Action> = {
   'mod+shift+arrowleft': 'moveTabLeft', 'mod+shift+arrowright': 'moveTabRight',
   'mod+shift+]': 'nextTab', 'mod+shift+[': 'prevTab', 'ctrl+tab': 'nextTab', 'ctrl+shift+tab': 'prevTab',
   'mod+alt+arrowleft': 'paneLeft', 'mod+alt+arrowright': 'paneRight', 'mod+alt+arrowup': 'paneUp', 'mod+alt+arrowdown': 'paneDown',
-  'mod+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', 'mod+,': 'settings', 'mod+ctrl+f': 'fullscreen',
+  'mod+=': 'fontUp', 'mod+shift+=': 'fontUp', 'mod+-': 'fontDown', 'mod+0': 'fontReset', 'mod+,': 'settings', 'mod+ctrl+f': 'fullscreen',
   'mod+shift+t': 'localTerm'
 }
 for (let i = 1; i <= 9; i++) {

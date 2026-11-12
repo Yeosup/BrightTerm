@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { Palette, Keyboard, ImageUp, Plug, Shield, Archive, Info, Trash2, FolderOpen, RefreshCw } from 'lucide-react'
 import { useApp } from '../state'
 import { api } from '../api'
-import { Modal, Field, Toggle, Seg } from './ui'
+import { Modal, Field, Toggle, Seg, NumberInput } from './ui'
+import { effectiveFamily, familyList, installedMonoFonts, withFallback } from '../fonts'
 import { TERMINAL_THEMES } from '../themes'
 import { SHORTCUTS } from './Welcome'
-import { DEFAULT_SETTINGS, type SyncStatus } from '@shared/types'
+import { DEFAULT_SETTINGS, MAC_FONT_FAMILY, type SyncStatus } from '@shared/types'
 import { isMac, SC, osUnlockText } from '../platform'
 
 type Sec = 'look' | 'input' | 'image' | 'conn' | 'security' | 'sync' | 'backup' | 'about'
@@ -63,14 +64,14 @@ export function SettingsDialog({ section }: { section?: string }): JSX.Element {
                   ))}
                 </div>
               </Field>
-              <div className="grid3">
-                <Field label="글꼴" hint="D2Coding, Cascadia Mono 등 설치된 고정폭 글꼴"><input className="input" value={settings.fontFamily} onChange={(e) => set({ fontFamily: e.target.value })} /></Field>
-                <Field label="글자 크기"><input className="input" type="number" min={8} max={32} value={settings.fontSize} onChange={(e) => set({ fontSize: Math.max(8, Math.min(32, +e.target.value || 14)) })} /></Field>
-                <Field label="줄 간격"><input className="input" type="number" step={0.05} min={1} max={2} value={settings.lineHeight} onChange={(e) => set({ lineHeight: +e.target.value || 1.15 })} /></Field>
+              <div className="grid2">
+                <Field label="글자 크기" hint={isMac ? '터미널 위에서 ⌘+휠·⌘= / ⌘- 로도 바꿉니다' : '터미널 위에서 Ctrl+휠·Ctrl+= / Ctrl+- 로도 바꿉니다'}><NumberInput min={8} max={32} fallback={14} value={settings.fontSize} onChange={(v) => set({ fontSize: v })} /></Field>
+                <Field label="줄 간격"><NumberInput step={0.05} min={1} max={2} fallback={1.15} value={settings.lineHeight} onChange={(v) => set({ lineHeight: v })} /></Field>
               </div>
+              <FontField value={settings.fontFamily} onChange={(v) => set({ fontFamily: v })} />
               <div className="grid2">
                 <Field label="커서 모양"><Seg value={settings.cursorStyle} onChange={(v) => set({ cursorStyle: v })} options={[{ value: 'block', label: '블록' }, { value: 'bar', label: '막대' }, { value: 'underline', label: '밑줄' }]} /></Field>
-                <Field label="스크롤백 (줄)"><input className="input" type="number" value={settings.scrollback} onChange={(e) => set({ scrollback: Math.max(500, Math.min(200000, +e.target.value || 10000)) })} /></Field>
+                <Field label="스크롤백 (줄)"><NumberInput min={500} max={200000} fallback={10000} value={settings.scrollback} onChange={(v) => set({ scrollback: v })} /></Field>
               </div>
               <div className="card">
                 <Toggle label="커서 깜빡임" value={settings.cursorBlink} onChange={(v) => set({ cursorBlink: v })} />
@@ -313,5 +314,38 @@ function SyncSection(): JSX.Element {
         </div>
       )}
     </>
+  )
+}
+
+/** Font: pick from installed monospace fonts or type a CSS font list; warns when the first font is not installed. */
+function FontField({ value, onChange }: { value: string; onChange: (v: string) => void }): JSX.Element {
+  const [draft, setDraft] = useState(value)
+  const [fonts, setFonts] = useState<string[] | null>(null)
+  useEffect(() => { setDraft(value) }, [value])
+  useEffect(() => { setFonts(installedMonoFonts()) }, [])
+  const commit = (): void => {
+    const v = draft.trim()
+    if (!v) setDraft(value)
+    else if (v !== value) onChange(v)
+  }
+  const first = familyList(value)[0] ?? ''
+  // the built-in stack is a fallback chain on purpose (e.g. no Cascadia Mono on Windows 10 → Consolas) — don't warn on it
+  const isDefault = value === DEFAULT_SETTINGS.fontFamily || value === MAC_FONT_FAMILY
+  const used = effectiveFamily(value)
+  const picked = fonts?.find((f) => f.toLowerCase() === first.toLowerCase()) ?? ''
+  return (
+    <div className="grid2">
+      <Field label="글꼴" hint={fonts === null ? '설치된 글꼴 확인 중…' : `이 컴퓨터에 설치된 고정폭 글꼴 ${fonts.length}개`}>
+        <select className="select" value={picked} onChange={(e) => e.target.value && onChange(withFallback(e.target.value))}>
+          <option value="">{picked ? '' : '목록에서 고르기…'}</option>
+          {(fonts ?? []).map((f) => <option key={f} value={f}>{f}</option>)}
+        </select>
+      </Field>
+      <Field label="글꼴 직접 입력" hint={!isDefault && used && used.toLowerCase() !== first.toLowerCase()
+        ? <span style={{ color: 'var(--warn)' }}>'{first}' 글꼴이 이 컴퓨터에 없어 '{used}' 로 표시됩니다. 이름을 확인하거나 왼쪽 목록에서 고르세요</span>
+        : '쉼표로 여러 개 — 앞 글꼴에 없는 글자(한글 등)는 다음 글꼴로. Enter 또는 칸을 벗어나면 적용'}>
+        <input className="input" value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') commit() }} />
+      </Field>
+    </div>
   )
 }

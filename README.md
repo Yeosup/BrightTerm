@@ -15,10 +15,10 @@ PuTTY를 대신할 **Windows·macOS용 SSH / Telnet / 시리얼 / 로컬 터미�
 
 | 운영체제 | 파일 | 비고 |
 | --- | --- | --- |
-| Windows | `BrightTerm-Setup-1.3.0.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
-| Windows | `BrightTerm-Portable-1.3.0.exe` | 설치 없이 실행 |
-| macOS (Apple Silicon) | `BrightTerm-1.3.0-mac-arm64.dmg` | M1 이후 맥 |
-| macOS (Intel) | `BrightTerm-1.3.0-mac-x64.dmg` | Intel 맥 |
+| Windows | `BrightTerm-Setup-1.3.1.exe` | 설치형. 설치 경로 선택, 바탕화면 바로가기 |
+| Windows | `BrightTerm-Portable-1.3.1.exe` | 설치 없이 실행 |
+| macOS (Apple Silicon) | `BrightTerm-1.3.1-mac-arm64.dmg` | M1 이후 맥 |
+| macOS (Intel) | `BrightTerm-1.3.1-mac-x64.dmg` | Intel 맥 |
 
 - **Windows**: "Windows의 PC 보호" 창이 뜨면 `추가 정보 → 실행`을 누르세요(코드 서명 전 빌드).
 - **macOS**: Apple 공증을 받은 빌드입니다. dmg에서 앱을 응용 프로그램 폴더로 끌어 넣고 바로 여세요. 처음 사내망(192.168.x.x 등) 서버에 접속할 때 **로컬 네트워크 접근**을 물으면 `허용`을 누르세요. 거부했다면 `시스템 설정 → 개인정보 보호 및 보안 → 로컬 네트워크`에서 켤 수 있습니다.
@@ -116,7 +116,7 @@ macOS에서는 앱 단축키가 모두 **⌘** 에 있어서 Ctrl+C/K/U/V/W 같�
 | SFTP 패널 | Ctrl+Shift+S | ⇧⌘S |
 | 동시 입력 | Ctrl+Shift+B | ⇧⌘B |
 | 서버 목록 숨기기 | Ctrl+Shift+L | ⇧⌘L |
-| 글자 크기 | Ctrl+휠, Ctrl+= / Ctrl+- / Ctrl+0 | ⌘= / ⌘- / ⌘0, 트랙패드 핀치 |
+| 글자 크기 | Ctrl+휠, Ctrl+= (Ctrl+Shift+=) / Ctrl+- / Ctrl+0 | ⌘+휠, ⌘= / ⌘- / ⌘0, 트랙패드 핀치 |
 | 설정 / 전체 화면 | — / F11 | ⌘, / ⌃⌘F |
 
 Windows에서 `vim` 등에 Ctrl+V를 보내야 한다면 설정 → 입력에서 "Ctrl+V로 붙여넣기"를 끄세요. 그러면 붙여넣기는 Ctrl+Shift+V로 합니다.

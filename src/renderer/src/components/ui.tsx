@@ -30,7 +30,37 @@ export function Modal(props: { title: ReactNode; onClose: () => void; children: 
   )
 }
 
-export function Field(props: { label?: ReactNode; hint?: ReactNode; children: ReactNode; className?: string }): JSX.Element {
+/**
+ * Number box that lets you type freely: a value is applied while typing only once it is inside [min, max]
+ * (so "1" on the way to "18" is not clamped to 8), and clamped / restored on blur or Enter.
+ */
+export function NumberInput(props: { value: number; min: number; max: number; step?: number; fallback: number; onChange: (v: number) => void }): JSX.Element {
+  const { value, min, max, fallback, onChange } = props
+  const [draft, setDraft] = useState(String(value))
+  const editing = useRef(false)
+  useEffect(() => { if (!editing.current) setDraft(String(value)) }, [value])
+  const commit = (): void => {
+    editing.current = false
+    const n = draft.trim() === '' ? NaN : +draft
+    const v = Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback
+    setDraft(String(v))
+    if (v !== value) onChange(v)
+  }
+  return (
+    <input className="input" type="number" min={min} max={max} step={props.step} value={draft}
+      onFocus={() => { editing.current = true }}
+      onChange={(e) => {
+        editing.current = true
+        setDraft(e.target.value)
+        const n = +e.target.value
+        if (e.target.value.trim() !== '' && Number.isFinite(n) && n >= min && n <= max && n !== value) onChange(n)
+      }}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === 'Enter') commit() }} />
+  )
+}
+
+export function Field(props:{ label?: ReactNode; hint?: ReactNode; children: ReactNode; className?: string }): JSX.Element {
   return (
     <div className={`field ${props.className ?? ''}`}>
       {props.label && <label>{props.label}</label>}
